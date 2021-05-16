@@ -42,9 +42,5 @@ const S = {
     font-size: 2rem;
     color: white;
     border-radius: 1rem;
-
-    &:active {
-      opacity: 0.8;
-    }
   `,
 };
