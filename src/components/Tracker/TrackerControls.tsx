@@ -4,14 +4,20 @@ import { styled } from '@linaria/react';
 import { useAtom } from 'jotai';
 import { FiX } from 'react-icons/fi';
 
+import useLocationWatcher from '../../geo/use-location-watcher';
 import { TrackerWrapperComponent } from './model';
 import { trackerState } from './store';
 
 const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
   const [, setIsTracking] = useAtom(trackerState);
+  const [, { unsubscribeCurrent }] = useLocationWatcher();
+
   const endTracking = useCallback(() => {
     setIsTracking(false);
-  }, [setIsTracking]);
+    if (unsubscribeCurrent) {
+      unsubscribeCurrent();
+    }
+  }, [setIsTracking, unsubscribeCurrent]);
 
   return (
     <S.Wrapper isVisible={isVisible}>
@@ -38,8 +44,8 @@ const S = {
     border-radius: 50%;
     z-index: 1000;
     padding: 1rem;
-    background-color: #cecececc;
-    color: white;
+    background-color: #fffafac7;
+    color: #5b5959;
     font-size: 2rem;
     display: flex;
     box-shadow: var(--common-shadow);

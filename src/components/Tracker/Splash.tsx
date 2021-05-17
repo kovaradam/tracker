@@ -3,15 +3,19 @@ import React, { useCallback } from 'react';
 import { styled } from '@linaria/react';
 import { useAtom } from 'jotai';
 
+import useLocationWatcher from '../../geo/use-location-watcher';
 import { TrackerWrapperComponent } from './model';
 import { trackerState } from './store';
 
 const Splash: TrackerWrapperComponent = ({ isVisible }) => {
   const [, setIsTracking] = useAtom(trackerState);
 
+  const [subscribe] = useLocationWatcher();
+
   const startTracking = useCallback(() => {
     setIsTracking(true);
-  }, [setIsTracking]);
+    subscribe(console.log);
+  }, [setIsTracking, subscribe]);
 
   return (
     <S.Wrapper isVisible={isVisible}>
