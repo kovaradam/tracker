@@ -1,29 +1,34 @@
 import React, { useCallback } from 'react';
 
 import { styled } from '@linaria/react';
-import { useAtom } from 'jotai';
 import { FiX } from 'react-icons/fi';
+import { MdCenterFocusWeak } from 'react-icons/md';
 
-import useLocationWatcher from '../../geo/use-location-watcher';
+import { getLatLngTuple } from '../../geo/utils';
+import useMap from '../../map/use-map';
 import { TrackerWrapperComponent } from './model';
-import { trackerState } from './store';
+import { useTracker } from './store';
 
 const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
-  const [, setIsTracking] = useAtom(trackerState);
-  const [, { unsubscribeCurrent }] = useLocationWatcher();
+  const [, { end }] = useTracker();
+  const [map] = useMap();
+  const [position] = useTracker();
 
-  const endTracking = useCallback(() => {
-    setIsTracking(false);
-    if (unsubscribeCurrent) {
-      unsubscribeCurrent();
+  const centerMapView = useCallback(() => {
+    const newMapViewPosition = getLatLngTuple(position);
+    if (newMapViewPosition) {
+      map?.setView(newMapViewPosition);
     }
-  }, [setIsTracking, unsubscribeCurrent]);
+  }, [position, map]);
 
   return (
     <S.Wrapper isVisible={isVisible}>
-      <S.CloseButton onClick={endTracking}>
+      <S.Button onClick={end}>
         <S.CloseIcon />
-      </S.CloseButton>
+      </S.Button>
+      <S.Button onClick={centerMapView}>
+        <S.CenterIcon />
+      </S.Button>
     </S.Wrapper>
   );
 };
@@ -34,7 +39,7 @@ const S = {
   Wrapper: styled.div<{ isVisible: boolean }>`
     visibility: ${({ isVisible }): string => (isVisible ? 'auto' : 'hidden')};
   `,
-  CloseButton: styled.button`
+  Button: styled.button`
     top: auto;
     left: auto;
     bottom: 0;
@@ -51,4 +56,5 @@ const S = {
     box-shadow: var(--common-shadow);
   `,
   CloseIcon: styled(FiX)``,
+  CenterIcon: styled(MdCenterFocusWeak)``,
 };

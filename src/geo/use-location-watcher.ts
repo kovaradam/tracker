@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { atom, useAtom } from 'jotai';
 
-import { watchPosition } from './location';
+import { watchPosition } from './utils';
 
 type Error = string | null;
 type Listener = PositionCallback;

@@ -1,13 +1,11 @@
 import React from 'react';
 
-import { useAtom } from 'jotai';
-
 import Splash from './Splash';
 import TrackerControls from './TrackerControls';
-import { trackerState } from './store';
+import { useTracker } from './store';
 
 const Tracker: React.FC = () => {
-  const [isTracking] = useAtom(trackerState);
+  const [, { isTracking }] = useTracker();
   return (
     <>
       <TrackerControls isVisible={isTracking} />
