@@ -5,16 +5,16 @@ import * as L from 'leaflet';
 
 import { getLatLngTuple } from '../../geo/utils';
 import useMap from '../../map/use-map';
-import { useTracker } from '../Tracker/store';
+import { useTracker } from '../../tracker/use-tracker';
 import Marker from './Marker';
-import tileLayers from './tile-layers';
+import tileLayers, { createTileLayer } from './tile-layers';
 
 const defaultPosition: L.LatLngTuple = [51.505, -0.09];
 const defaultZoom = 13;
 
 const Map: React.FC = () => {
   const mapId = 'mapId';
-  const [map, setMap] = useMap();
+  const [map, { setMap }] = useMap();
   const [position] = useTracker();
   const viewPosition = useRef(defaultPosition);
 
@@ -28,8 +28,8 @@ const Map: React.FC = () => {
   useEffect(() => {
     const map = L.map(mapId);
     map.setView(viewPosition.current, defaultZoom);
-    const layer = tileLayers.openStreetMap;
-    L.tileLayer(layer.url, layer.options).addTo(map);
+    const layer = createTileLayer(tileLayers.openStreetMap);
+    layer.addTo(map);
     setMap(map);
   }, [setMap]);
 

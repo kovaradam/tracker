@@ -1,8 +1,8 @@
 import React from 'react';
 
+import { useTracker } from '../../tracker/use-tracker';
 import Splash from './Splash';
 import TrackerControls from './TrackerControls';
-import { useTracker } from './store';
 
 const Tracker: React.FC = () => {
   const [, { isTracking }] = useTracker();

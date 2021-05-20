@@ -1,15 +1,17 @@
 import React from 'react';
 
 import { styled } from '@linaria/react';
+import { BiTimer } from 'react-icons/bi';
 
+import { useTracker } from '../../tracker/use-tracker';
 import { TrackerWrapperComponent } from './model';
-import { useTracker } from './store';
 
 const Splash: TrackerWrapperComponent = ({ isVisible }) => {
   const [, { start }] = useTracker();
 
   return (
     <S.Wrapper isVisible={isVisible}>
+      <S.TimerIcon />
       <S.TrackButton onClick={start}>Start trackin'</S.TrackButton>
     </S.Wrapper>
   );
@@ -37,5 +39,11 @@ const S = {
     font-size: 2rem;
     color: white;
     border-radius: 1rem;
+  `,
+  TimerIcon: styled(BiTimer)`
+    font-size: 10rem;
+    color: gray;
+    margin-bottom: 5vh;
+    outline: white; ;
   `,
 };

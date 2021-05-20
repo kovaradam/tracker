@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 
 import { atom, useAtom } from 'jotai';
 
-import useLocationWatcher from '../../geo/use-location-watcher';
+import useLocationWatcher from '../geo/use-location-watcher';
 
 type TrackerState = {
   isTracking: boolean;
@@ -31,5 +31,6 @@ export function useTracker(): UseTrackerReturnType {
       unsubscribeCurrent();
     }
   }, [setState, unsubscribeCurrent]);
-  return [state.position, { start, end, ...state }];
+
+  return [state.position, { start, end, isTracking: state.isTracking }];
 }
