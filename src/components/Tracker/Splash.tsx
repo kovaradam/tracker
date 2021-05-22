@@ -4,7 +4,7 @@ import { styled } from '@linaria/react';
 import { BiTimer } from 'react-icons/bi';
 
 import { useTracker } from '../../tracker/use-tracker';
-import { TrackerWrapperComponent } from './model';
+import { TrackerWrapperComponent } from './';
 
 const Splash: TrackerWrapperComponent = ({ isVisible }) => {
   const [, { start }] = useTracker();

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { styled } from '@linaria/react';
 import { FiX } from 'react-icons/fi';
@@ -7,19 +7,25 @@ import { MdCenterFocusWeak } from 'react-icons/md';
 
 import useMap from '../../map/use-map';
 import { useTracker } from '../../tracker/use-tracker';
-import Header from './Header';
-import { TrackerWrapperComponent } from './model';
+import { TrackerWrapperComponent } from './';
+import Message from './Message';
 
 const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
-  const [, { end }] = useTracker();
+  const [, { end, start, isTracking }] = useTracker();
   const [, { centerMapView }] = useMap();
+
+  const toggleTracker = useCallback(() => {
+    (isTracking ? end : start)();
+  }, [isTracking, start, end]);
 
   return (
     <S.Wrapper isVisible={isVisible}>
-      <Header />
-      <S.RightPanelWrapper>
-        <S.StopButton onClick={end}>Stop</S.StopButton>
-      </S.RightPanelWrapper>
+      <S.TopPanelWrapper>
+        <S.StateButton onClick={toggleTracker} isTracking={isTracking}>
+          {isTracking ? 'Stop' : 'Start'}
+        </S.StateButton>
+        <Message />
+      </S.TopPanelWrapper>
       <S.LeftPanelWrapper>
         <S.UtilsButton onClick={centerMapView}>
           <S.CenterIcon />
@@ -38,31 +44,37 @@ const S = {
   Wrapper: styled.div<{ isVisible: boolean }>`
     visibility: ${({ isVisible }): string => (isVisible ? 'auto' : 'hidden')};
     & button {
-      z-index: 1000;
       box-shadow: var(--common-shadow);
       width: min-content;
+      height: min-content;
     }
     & > div {
+      z-index: 1000;
       padding: 1rem;
-      position: absolute;
+      position: fixed;
       height: min-content;
-      width: min-content;
       display: flex;
-      flex-direction: column;
     }
   `,
-  RightPanelWrapper: styled.div`
+  TopPanelWrapper: styled.div`
     top: 0;
     right: 0;
-    align-items: flex-end;
+    align-items: space-between;
+    justify-content: space-between;
+    flex-direction: row-reverse;
+    width: 100vw;
+    box-sizing: border-box;
   `,
   LeftPanelWrapper: styled.div`
+    width: min-content;
+    flex-direction: column;
     bottom: 0;
     left: 0;
     align-items: flex-start;
   `,
-  StopButton: styled.button`
-    background-color: var(--base-red);
+  StateButton: styled.button<{ isTracking: boolean }>`
+    background-color: ${({ isTracking }): string =>
+      isTracking ? 'var(--base-red)' : 'var(--green-main)'};
     border-radius: 10px;
     color: white;
     padding: 0.5rem;

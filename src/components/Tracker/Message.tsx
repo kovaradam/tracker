@@ -4,7 +4,9 @@ import { styled } from '@linaria/react';
 
 import useLocationWatcher from '../../geo/use-location-watcher';
 
-const Header: React.FC = () => {
+type Props = { className?: string };
+
+const Message: React.FC<Props> = ({ className }) => {
   const [, { error }] = useLocationWatcher();
 
   if (!error) {
@@ -12,26 +14,26 @@ const Header: React.FC = () => {
   }
   return (
     <S.Wrapper>
-      <S.Message>{error}</S.Message>
+      <S.Message className={className}>{error}</S.Message>
     </S.Wrapper>
   );
 };
 
-export default Header;
+export default Message;
 
 const S = {
-  Wrapper: styled.header`
-    position: absolute;
+  Wrapper: styled.div`
     z-index: 1000;
     top: 0;
-    padding: 1rem;
     color: #434363;
   `,
   Message: styled.code`
     border-radius: 5px;
     padding: 0 0.1rem;
     animation: rotate 1s linear;
-
+    word-wrap: break-word;
+    display: inline-block;
+    max-width: 70vw;
     @keyframes rotate {
       from {
         background-color: #ff9a4a;
