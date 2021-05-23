@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
 
 import { css } from '@linaria/core';
@@ -6,29 +7,45 @@ import { styled } from '@linaria/react';
 import * as L from 'leaflet';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 
+import { Path as PathType } from '../../db/model';
+import { getLatLngTuple } from '../../geo/utils';
 import useMap from '../../map/use-map';
+import { createMarkerIcon } from './UserMarker';
 
-type Path = { id: string; points: L.LatLngTuple[]; color: string };
-
-type Props = Path & { showMarker?: boolean };
+type Props = PathType & { showMarker?: boolean };
 
 const Path: React.FC<Props> = (props) => {
-  const { showMarker, color, points } = props;
+  const { showMarker, color, positions, id } = props;
+  const points = useMemo(() => getPointsFromPositions(positions), [positions]);
   const [map] = useMap();
   const persisted = useRef<Partial<{ line: L.Polyline; marker: L.Marker }>>({
     line: undefined,
     marker: undefined,
   });
 
-  useEffect(() => {
-    if (!map) return;
-
+  const updateLine = useCallback(() => {
+    if (!map) {
+      return;
+    }
+    if (persisted.current.line) {
+      persisted.current.line.remove();
+    }
     persisted.current.line = L.polyline(points as L.LatLngTuple[]);
     persisted.current.line.setStyle({ color, className: pathStyle });
     persisted.current.line.addTo(map);
+  }, [persisted, points, color, map]);
 
-    if (showMarker) {
-      const [markerIcon, renderIconContent] = createIcon(props);
+  // on map init
+  useEffect(() => {
+    if (!map) return;
+
+    updateLine();
+
+    if (showMarker !== false) {
+      const [markerIcon, renderIconContent] = createMarkerIcon(
+        id,
+        <Icon color={color} />,
+      );
       persisted.current.marker = L.marker(points[points.length - 1] as L.LatLngTuple, {
         icon: markerIcon,
       });
@@ -39,15 +56,24 @@ const Path: React.FC<Props> = (props) => {
   }, [map]);
 
   useEffect(() => {
-    if (persisted.current.line) {
-      persisted.current.line.setStyle({ color });
-    }
-  }, [props]);
+    updateLine();
+    const elements = persisted.current;
+    return () => {
+      elements.line?.remove();
+      elements.marker?.remove();
+    };
+  }, [points, color]);
 
   return null;
 };
 
 export default Path;
+
+function getPointsFromPositions(positions: GeolocationPosition[]): L.LatLngTuple[] {
+  return positions
+    .map(getLatLngTuple)
+    .filter((tuple) => tuple !== null) as L.LatLngTuple[];
+}
 
 const pathStyle = css`
   stroke-dasharray: 8;
@@ -60,23 +86,6 @@ const pathStyle = css`
     }
   }
 `;
-
-function createIcon(path: Path): [L.DivIcon, () => void] {
-  const icon = L.divIcon({
-    className: `${path.id}`,
-    iconSize: [30, 80],
-  });
-
-  function createIconContent(): void {
-    const iconElement = document.getElementsByClassName(path.id)[0];
-    if (!iconElement) {
-      throw new Error('Icon element not found');
-    }
-
-    ReactDOM.render(<Icon color={path.color} />, iconElement);
-  }
-  return [icon, createIconContent];
-}
 
 const Icon = styled(FaMapMarkerAlt)<{ color: string }>`
   color: ${({ color }): string => color};

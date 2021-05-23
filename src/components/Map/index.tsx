@@ -1,13 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 
 import { styled } from '@linaria/react';
+import { useRead } from 'indexeddb-hooked';
 import * as L from 'leaflet';
 
+import { StoreName } from '../../db/config';
+import { Path as DBPath } from '../../db/model';
 import { getLatLngTuple } from '../../geo/utils';
 import useMap from '../../map/use-map';
 import { useTracker } from '../../tracker/use-tracker';
-import Marker from './Marker';
 import Path from './Path';
+import UserMarker from './UserMarker';
 import tileLayers, { createTileLayer } from './tile-layers';
 
 const defaultPosition: L.LatLngTuple = [51.505, -0.09];
@@ -16,15 +19,17 @@ const defaultZoom = 13;
 const Map: React.FC = () => {
   const mapId = 'mapId';
   const [map, { setMap }] = useMap();
-  const [position] = useTracker();
+  const [userPosition, { currentPath, isTracking }] = useTracker();
   const viewPosition = useRef(defaultPosition);
 
+  const [paths] = useRead<DBPath>(StoreName.PATHS);
+
   useEffect(() => {
-    viewPosition.current = getLatLngTuple(position) || viewPosition.current;
+    viewPosition.current = getLatLngTuple(userPosition) || viewPosition.current;
     if (map !== null) {
       map.setView(viewPosition.current);
     }
-  }, [map, position]);
+  }, [map, userPosition]);
 
   useEffect(() => {
     const map = L.map(mapId);
@@ -32,15 +37,18 @@ const Map: React.FC = () => {
     const layer = createTileLayer(tileLayers.openStreetMap);
     layer.addTo(map);
     setMap(map);
-    map.on('click', (e: any) => console.log(e.latlng));
   }, [setMap]);
+
+  const arePathsVisible = !isTracking && paths !== null;
+  const isCurrentPathVisible = isTracking;
 
   return (
     <S.Map id={mapId}>
-      <Marker />
-      {defaultPaths.map((path) => (
-        <Path key={path.id} {...path} showMarker={path.id !== 'current'} />
-      ))}
+      <UserMarker />
+      {isCurrentPathVisible && currentPath && (
+        <Path {...currentPath} showMarker={false} />
+      )}
+      {arePathsVisible && paths?.map((path) => <Path key={path.id} {...path} />)}
     </S.Map>
   );
 };
@@ -52,23 +60,3 @@ const S = {
     height: 100%;
   `,
 };
-
-const defaultPaths: Path[] = [
-  {
-    id: 'id',
-    points: [
-      [50.09999155153073, 14.421787261962892],
-      [50.10208363663026, 14.433803558349611],
-      [50.10252406395657, 14.421100616455078],
-    ],
-    color: 'blue',
-  },
-  {
-    id: 'current',
-    points: [
-      [50.108249250710514, 14.443244934082033],
-      [50.098560072241156, 14.443244934082033],
-    ],
-    color: 'yellow',
-  },
-];

@@ -1,12 +1,12 @@
-export const getLatLngTuple = (
+export function getLatLngTuple(
   position: GeolocationPosition | null,
-): L.LatLngTuple | null => {
+): L.LatLngTuple | null {
   if (position === null) {
     return null;
   }
   const { latitude, longitude } = position.coords;
   return [latitude, longitude];
-};
+}
 
 export function watchPosition(
   onSuccess: PositionCallback,

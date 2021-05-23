@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback } from 'react';
 
 import { atom, useAtom } from 'jotai';
 
