@@ -81,7 +81,6 @@ function getPathUpdater(
     }
 
     const newPositions = prevPath.positions.concat(newPosition);
-    console.log(newPositions);
 
     return { ...prevPath, positions: newPositions };
   };

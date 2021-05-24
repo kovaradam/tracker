@@ -10,31 +10,27 @@ import useMap from '../../map/use-map';
 import { useTracker, CurrentPath } from '../../tracker/use-tracker';
 
 const UserMarker: React.FC = () => {
-  const [position, { isTracking, currentPath }] = useTracker();
+  const [position, { currentPath }] = useTracker();
   const [map] = useMap();
   const marker = useRef<L.Marker | null>(null);
+  const direction = useRef(0);
 
   const removeMarker = useCallback((): void => {
     marker.current?.remove();
   }, [marker]);
 
   useEffect(() => {
-    if (!isTracking) {
-      removeMarker();
-    }
-  }, [removeMarker, isTracking]);
-
-  useEffect(() => {
     if (map !== null && position !== null) {
-      const direction = getMarkerDirection(currentPath);
-      const [icon, renderIconContent] = createUserMarkerIcon(direction);
+      direction.current = getMarkerDirection(currentPath) || direction.current;
+
+      const [icon, renderIconContent] = createUserMarkerIcon(direction.current);
       const { latitude, longitude } = position.coords;
       marker.current = L.marker([latitude, longitude], { icon });
       marker.current.addTo(map);
       renderIconContent();
     }
     return removeMarker;
-  }, [map, position, removeMarker, currentPath]);
+  }, [map, position, removeMarker, currentPath, direction]);
 
   return null;
 };
@@ -84,29 +80,34 @@ const Icon = styled(FaLocationArrow)<{ color: string }>`
   transform-origin: right top;
 `;
 
-function getMarkerDirection(path: CurrentPath): number {
-  const defaultDirection = 0;
+function getMarkerDirection(path: CurrentPath): number | null {
+  const errorValue = null;
   const pathPositionsLength = path?.positions.length || 0;
   if (!path || pathPositionsLength < 2) {
-    return defaultDirection;
+    return errorValue;
   }
   const lastTwoPositions = [
     path.positions[pathPositionsLength - 2],
     path.positions[pathPositionsLength - 1],
   ];
+
   const positionTuples = lastTwoPositions
     .map(getLatLngTuple)
     .filter((tuple) => tuple !== null);
 
   const dx = positionTuples[0]![0] - positionTuples[1]![0];
   const dy = positionTuples[0]![1] - positionTuples[1]![1];
-  const degrees = (Math.atan(Math.abs(dy / dx)) * 180) / Math.PI;
+  if (dx === 0) {
+    return errorValue;
+  }
+  const degrees = (Math.atan(Math.abs(dy / dx)) * 180) / Math.PI + 180;
+
   if (dx < 0 && dy >= 0) {
-    return degrees + 90;
+    return 180 - degrees;
   } else if (dx < 0 && dy < 0) {
     return degrees + 180;
   } else if (dx >= 0 && dy < 0) {
-    return degrees - 90;
+    return -degrees;
   } else {
     return degrees;
   }
