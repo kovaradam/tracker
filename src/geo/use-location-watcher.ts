@@ -28,14 +28,10 @@ function useLocationWatcher(): UseLocationReturntype {
 
   const subscribe = useCallback(
     (listener: Listener, options?: PositionOptions): Unsubscribe => {
-      if (state.unsubscribeCurrent) {
-        state.unsubscribeCurrent();
-      }
+      state.unsubscribeCurrent?.();
       const unsubscribeWatcher = watchPosition(listener, onError, options);
       function unsubscribe() {
-        if (unsubscribeWatcher) {
-          unsubscribeWatcher();
-        }
+        unsubscribeWatcher?.();
         setState((prev) => ({ ...prev, unsubscribeCurrent: undefined }));
       }
       setState((prev) => ({
