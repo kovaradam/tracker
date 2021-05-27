@@ -11,7 +11,7 @@ const Splash: TrackerWrapperComponent = ({ isVisible }) => {
 
   return (
     <S.Wrapper isVisible={isVisible}>
-      <S.TimerIcon />
+      <S.AppIcon />
       <S.TrackButton onClick={start}>Start trackin'</S.TrackButton>
     </S.Wrapper>
   );
@@ -40,7 +40,7 @@ const S = {
     color: white;
     border-radius: 1rem;
   `,
-  TimerIcon: styled(BiTimer)`
+  AppIcon: styled(BiTimer)`
     font-size: 10rem;
     color: gray;
     margin-bottom: 5vh;

@@ -9,6 +9,7 @@ import useMap from '../../map/use-map';
 import { useTracker } from '../../tracker/use-tracker';
 import { TrackerWrapperComponent } from './';
 import Message from './Message';
+import Timer from './Timer';
 
 const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
   const [, { end, start, isTracking }] = useTracker();
@@ -26,7 +27,7 @@ const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
         </S.StateButton>
         <Message />
       </S.TopPanelWrapper>
-      <S.LeftPanelWrapper>
+      <S.LeftPanelWrapper isVisible={!isTracking}>
         <S.UtilsButton onClick={centerMapView}>
           <S.CenterIcon />
         </S.UtilsButton>
@@ -34,6 +35,9 @@ const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
           <S.SettingsIcon />
         </S.UtilsButton>
       </S.LeftPanelWrapper>
+      <S.BottomPanelWrapper isVisible={isTracking}>
+        <Timer isActive={isTracking} />
+      </S.BottomPanelWrapper>
     </S.Wrapper>
   );
 };
@@ -65,13 +69,25 @@ const S = {
     width: 100vw;
     box-sizing: border-box;
   `,
-  LeftPanelWrapper: styled.div`
+
+  LeftPanelWrapper: styled.div<{ isVisible: boolean }>`
     width: min-content;
     flex-direction: column;
     bottom: 0;
-    left: 0;
+    left: ${({ isVisible }): number => (isVisible ? 0 : -80)}px;
+    transition: left 200ms;
     align-items: flex-start;
   `,
+  BottomPanelWrapper: styled.div<{ isVisible: boolean }>`
+    bottom: ${({ isVisible }): number => (isVisible ? 0 : -100)}px;
+    transition: bottom 200ms;
+    right: 0;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    box-sizing: border-box;
+  `,
+
   StateButton: styled.button<{ isTracking: boolean }>`
     background-color: ${({ isTracking }): string =>
       isTracking ? 'var(--base-red)' : 'var(--green-main)'};
