@@ -44,7 +44,7 @@ const Map: React.FC = () => {
 
   return (
     <S.Map id={mapId}>
-      {isTracking && <UserMarker />}
+      <UserMarker isActive={isTracking} />
       {isCurrentPathVisible && currentPath && (
         <Path {...currentPath} showMarker={false} />
       )}

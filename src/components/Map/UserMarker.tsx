@@ -3,17 +3,21 @@ import ReactDOM from 'react-dom';
 
 import { styled } from '@linaria/react';
 import * as L from 'leaflet';
-import { FaLocationArrow } from 'react-icons/fa';
+import { FaCircle, FaLocationArrow } from 'react-icons/fa';
 
 import { getLatLngTuple } from '../../geo/utils';
 import useMap from '../../map/use-map';
 import { useTracker, CurrentPath } from '../../tracker/use-tracker';
 
-const UserMarker: React.FC = () => {
+type Props = { isActive: boolean };
+
+const defaultDirection = 0;
+
+const UserMarker: React.FC<Props> = ({ isActive }) => {
   const [position, { currentPath }] = useTracker();
   const [map] = useMap();
   const marker = useRef<L.Marker | null>(null);
-  const direction = useRef(0);
+  const direction = useRef(defaultDirection);
 
   const removeMarker = useCallback((): void => {
     marker.current?.remove();
@@ -23,14 +27,14 @@ const UserMarker: React.FC = () => {
     if (map !== null && position !== null) {
       direction.current = getMarkerDirection(currentPath) || direction.current;
 
-      const [icon, renderIconContent] = createUserMarkerIcon(direction.current);
+      const [icon, renderIconContent] = createUserMarkerIcon(direction.current, isActive);
       const { latitude, longitude } = position.coords;
       marker.current = L.marker([latitude, longitude], { icon });
       marker.current.addTo(map);
       renderIconContent();
     }
     return removeMarker;
-  }, [map, position, removeMarker, currentPath, direction]);
+  }, [map, position, removeMarker, currentPath, direction, isActive]);
 
   return null;
 };
@@ -57,7 +61,11 @@ export function createMarkerIcon(
 
 function createUserMarkerIcon(
   directionInDeg: number,
+  isTracking: boolean,
 ): ReturnType<typeof createMarkerIcon> {
+  const Icon = isTracking ? ActiveIcon : PassiveIcon;
+  console.log(isTracking);
+
   return createMarkerIcon(
     'user-marker-icon',
     <Icon
@@ -67,7 +75,7 @@ function createUserMarkerIcon(
   );
 }
 
-const Icon = styled(FaLocationArrow)<{ color: string }>`
+const ActiveIcon = styled(FaLocationArrow)<{ color: string }>`
   color: ${({ color }): string => color};
   width: min-content;
   height: min-content;
@@ -77,6 +85,19 @@ const Icon = styled(FaLocationArrow)<{ color: string }>`
   transition: transform 200ms;
   margin-top: 40px;
   margin-left: -100%;
+  transform-origin: right top;
+`;
+
+const PassiveIcon = styled(FaCircle)<{ color: string }>`
+  color: ${({ color }): string => color};
+  width: min-content;
+  height: min-content;
+  font-size: 2rem;
+  stroke-width: 35px;
+  stroke: white;
+  transition: transform 200ms;
+  margin-top: 20px;
+  margin-left: -55%;
   transform-origin: right top;
 `;
 
