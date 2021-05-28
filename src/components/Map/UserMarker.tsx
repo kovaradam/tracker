@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 
+import { css } from '@linaria/core';
 import { styled } from '@linaria/react';
 import * as L from 'leaflet';
 import { FaCircle, FaLocationArrow } from 'react-icons/fa';
@@ -12,6 +13,7 @@ import { useTracker, CurrentPath } from '../../tracker/use-tracker';
 type Props = { isActive: boolean };
 
 const defaultDirection = 0;
+const activeIconFixDirection = -45;
 
 const UserMarker: React.FC<Props> = ({ isActive }) => {
   const [position, { currentPath }] = useTracker();
@@ -21,20 +23,44 @@ const UserMarker: React.FC<Props> = ({ isActive }) => {
 
   const removeMarker = useCallback((): void => {
     marker.current?.remove();
+    marker.current = null;
+    direction.current = defaultDirection;
   }, [marker]);
 
-  useEffect(() => {
+  const createMarker = useCallback(() => {
     if (map !== null && position !== null) {
-      direction.current = getMarkerDirection(currentPath) || direction.current;
-
-      const [icon, renderIconContent] = createUserMarkerIcon(direction.current, isActive);
+      const [icon, renderIconContent] = createUserMarkerIcon(isActive);
       const { latitude, longitude } = position.coords;
       marker.current = L.marker([latitude, longitude], { icon });
       marker.current.addTo(map);
       renderIconContent();
     }
+  }, [map, position, isActive]);
+
+  useEffect(() => {
+    // change marker on active change
+    createMarker();
     return removeMarker;
-  }, [map, position, removeMarker, currentPath, direction, isActive]);
+  }, [isActive]);
+
+  useEffect(() => {
+    if (!position) {
+      return;
+    }
+    if (!marker.current) {
+      createMarker();
+    }
+    direction.current = getMarkerDirection(currentPath) || direction.current;
+    const { latitude, longitude } = position.coords;
+    marker.current?.setLatLng([latitude, longitude]);
+    const iconElement = document.getElementById('marker-icon');
+    if (iconElement) {
+      const rotation = isActive
+        ? direction.current + activeIconFixDirection
+        : defaultDirection;
+      iconElement.style.transform = `rotate(${rotation}deg)`;
+    }
+  }, [position, removeMarker, currentPath, direction, isActive, createMarker]);
 
   return null;
 };
@@ -51,54 +77,44 @@ export function createMarkerIcon(
   });
 
   function createIconContent(): void {
-    const iconElement = document.getElementsByClassName(className)[0];
-    if (iconElement) {
-      ReactDOM.render(iconComponent, iconElement);
+    const markerElement = document.getElementsByClassName(className)[0];
+    if (markerElement) {
+      ReactDOM.render(iconComponent, markerElement);
     }
   }
   return [icon, createIconContent];
 }
 
-function createUserMarkerIcon(
-  directionInDeg: number,
-  isTracking: boolean,
-): ReturnType<typeof createMarkerIcon> {
+function createUserMarkerIcon(isTracking: boolean): ReturnType<typeof createMarkerIcon> {
   const Icon = isTracking ? ActiveIcon : PassiveIcon;
-  console.log(isTracking);
 
   return createMarkerIcon(
     'user-marker-icon',
-    <Icon
-      color={'#ffa6a69e'}
-      style={{ transform: `rotate(${directionInDeg - 45}deg)` }}
-    />,
+    <Icon id="marker-icon" className={commonStyle} color={'#ffa6a69e'} />,
   );
 }
 
-const ActiveIcon = styled(FaLocationArrow)<{ color: string }>`
-  color: ${({ color }): string => color};
+const commonStyle = css`
   width: min-content;
   height: min-content;
-  font-size: 3rem;
   stroke-width: 35px;
   stroke: white;
   transition: transform 200ms;
+  transform-origin: right top;
+`;
+
+const ActiveIcon = styled(FaLocationArrow)<{ color: string }>`
+  color: ${({ color }): string => color};
+  font-size: 3rem;
   margin-top: 40px;
   margin-left: -100%;
-  transform-origin: right top;
+  transform: rotate(${activeIconFixDirection}deg);
 `;
 
 const PassiveIcon = styled(FaCircle)<{ color: string }>`
   color: ${({ color }): string => color};
-  width: min-content;
-  height: min-content;
   font-size: 2rem;
-  stroke-width: 35px;
-  stroke: white;
-  transition: transform 200ms;
   margin-top: 20px;
-  margin-left: -55%;
-  transform-origin: right top;
 `;
 
 function getMarkerDirection(path: CurrentPath): number | null {
