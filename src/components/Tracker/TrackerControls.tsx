@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useReducer } from 'react';
 
 import { styled } from '@linaria/react';
 import { FiX } from 'react-icons/fi';
@@ -9,14 +9,21 @@ import useMap from '../../map/use-map';
 import { useTracker } from '../../tracker/use-tracker';
 import { TrackerWrapperComponent } from './';
 import Message from './Message';
+import PathDialog from './PathDialog';
 import Timer from './Timer';
 
 const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
   const [, { end, start, isTracking }] = useTracker();
   const [, { centerMapView }] = useMap();
+  const [isPathDialogVisible, toggleIsPathDialogVisible] = useReducer((p) => !p, false);
 
   const toggleTracker = useCallback(() => {
-    (isTracking ? end : start)();
+    if (isTracking) {
+      end();
+      toggleIsPathDialogVisible();
+    } else {
+      start();
+    }
   }, [isTracking, start, end]);
 
   return (
@@ -38,6 +45,7 @@ const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
       <S.BottomPanelWrapper isVisible={isTracking}>
         <Timer isActive={isTracking} />
       </S.BottomPanelWrapper>
+      {isPathDialogVisible && <PathDialog hide={toggleIsPathDialogVisible} />}
     </S.Wrapper>
   );
 };
@@ -47,7 +55,7 @@ export default TrackerControls;
 const S = {
   Wrapper: styled.div<{ isVisible: boolean }>`
     visibility: ${({ isVisible }): string => (isVisible ? 'auto' : 'hidden')};
-    & button {
+    & > div > button {
       box-shadow: var(--common-shadow);
       width: min-content;
       height: min-content;
