@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 
 import { css } from '@linaria/core';
@@ -14,6 +14,7 @@ type Props = { isActive: boolean };
 
 const defaultDirection = 0;
 const activeIconFixDirection = -45;
+const iconId = 'marker-icon';
 
 const UserMarker: React.FC<Props> = ({ isActive }) => {
   const [position, { currentPath }] = useTracker();
@@ -53,7 +54,7 @@ const UserMarker: React.FC<Props> = ({ isActive }) => {
     direction.current = getMarkerDirection(currentPath) || direction.current;
     const { latitude, longitude } = position.coords;
     marker.current?.setLatLng([latitude, longitude]);
-    const iconElement = document.getElementById('marker-icon');
+    const iconElement = document.getElementById(iconId);
     if (iconElement) {
       const rotation = isActive
         ? direction.current + activeIconFixDirection
@@ -88,13 +89,11 @@ export function createMarkerIcon(
 function createUserMarkerIcon(isTracking: boolean): ReturnType<typeof createMarkerIcon> {
   const Icon = isTracking ? ActiveIcon : PassiveIcon;
 
-  return createMarkerIcon(
-    'user-marker-icon',
-    <Icon id="marker-icon" className={commonStyle} color={'#ffa6a69e'} />,
-  );
+  return createMarkerIcon('user-marker', <Icon id={iconId} className={commonStyle} />);
 }
 
 const commonStyle = css`
+  color: #ffa6a69e;
   width: min-content;
   height: min-content;
   stroke-width: 35px;
@@ -103,16 +102,14 @@ const commonStyle = css`
   transform-origin: right top;
 `;
 
-const ActiveIcon = styled(FaLocationArrow)<{ color: string }>`
-  color: ${({ color }): string => color};
+const ActiveIcon = styled(FaLocationArrow)`
   font-size: 3rem;
   margin-top: 40px;
   margin-left: -100%;
   transform: rotate(${activeIconFixDirection}deg);
 `;
 
-const PassiveIcon = styled(FaCircle)<{ color: string }>`
-  color: ${({ color }): string => color};
+const PassiveIcon = styled(FaCircle)`
   font-size: 2rem;
   margin-top: 20px;
 `;
