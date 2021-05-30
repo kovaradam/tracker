@@ -48,7 +48,10 @@ const Map: React.FC = () => {
       {isCurrentPathVisible && currentPath && (
         <Path {...currentPath} showMarker={false} />
       )}
-      {arePathsVisible && paths?.map((path) => <Path key={path.id} {...path} />)}
+      {arePathsVisible &&
+        paths
+          ?.filter((path) => path.positions.length !== 0)
+          .map((path) => <Path key={path.id} {...path} />)}
     </S.Map>
   );
 };

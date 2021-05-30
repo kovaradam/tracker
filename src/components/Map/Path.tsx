@@ -1,13 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import ReactDOM from 'react-dom';
 
 import { css } from '@linaria/core';
 import { styled } from '@linaria/react';
 import * as L from 'leaflet';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 
-import { Path as PathType } from '../../db/model';
+import { Path as PathType, Position } from '../../db/model';
 import { getLatLngTuple } from '../../geo/utils';
 import useMap from '../../map/use-map';
 import { createMarkerIcon } from './UserMarker';
@@ -33,17 +32,10 @@ const Path: React.FC<Props> = (props) => {
     persisted.current.line = L.polyline(points as L.LatLngTuple[]);
     persisted.current.line.setStyle({ color, className: pathStyle });
     persisted.current.line.addTo(map);
-  }, [persisted, points, color, map]);
-
-  // on map init
-  useEffect(() => {
-    if (!map) return;
-
-    updateLine();
 
     if (showMarker !== false) {
       const [markerIcon, renderIconContent] = createMarkerIcon(
-        id,
+        `path-${id}`,
         <Icon color={color} />,
       );
       persisted.current.marker = L.marker(points[points.length - 1] as L.LatLngTuple, {
@@ -53,14 +45,21 @@ const Path: React.FC<Props> = (props) => {
       persisted.current.marker.addTo(map);
       renderIconContent();
     }
+  }, [persisted, points, color, map]);
+
+  // on map init
+  useEffect(() => {
+    if (!map) return;
+    updateLine();
   }, [map]);
 
   useEffect(() => {
     updateLine();
-    const elements = persisted.current;
+    const { line, marker } = persisted.current;
+
     return () => {
-      elements.line?.remove();
-      elements.marker?.remove();
+      line?.remove();
+      marker?.remove();
     };
   }, [points, color]);
 
@@ -69,7 +68,7 @@ const Path: React.FC<Props> = (props) => {
 
 export default Path;
 
-function getPointsFromPositions(positions: GeolocationPosition[]): L.LatLngTuple[] {
+function getPointsFromPositions(positions: Position[]): L.LatLngTuple[] {
   return positions
     .map(getLatLngTuple)
     .filter((tuple) => tuple !== null) as L.LatLngTuple[];

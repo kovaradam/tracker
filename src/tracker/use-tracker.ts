@@ -2,18 +2,19 @@ import { useCallback } from 'react';
 
 import { atom, useAtom } from 'jotai';
 
-import { Path } from '../db/model';
+import { Position } from '../db/model';
 import useLocationWatcher from '../geo/use-location-watcher';
+import { CurrentPath, useCurrentPath } from './use-current-path';
 
 type TrackerState = {
   isTracking: boolean;
-  position: GeolocationPosition | null;
+  position: Position | null;
 };
 
 const trackerState = atom<TrackerState>({ isTracking: false, position: null });
 
 type UseTrackerReturnType = [
-  position: GeolocationPosition | null,
+  position: Position | null,
   tracking: {
     start: () => void;
     end: () => void;
@@ -43,51 +44,4 @@ export function useTracker(): UseTrackerReturnType {
   }, [setState, unsubscribeCurrent]);
 
   return [state.position, { start, end, isTracking: state.isTracking, currentPath }];
-}
-
-export type CurrentPath = Path | null;
-
-const currentPath = atom<CurrentPath>(null);
-
-type UseCurrentPathReturnType = [
-  path: CurrentPath,
-  updatePath: (position: GeolocationPosition) => void,
-];
-
-function useCurrentPath(): UseCurrentPathReturnType {
-  const [path, setPath] = useAtom(currentPath);
-
-  const updatePath = useCallback(
-    (newPosition: GeolocationPosition) => {
-      const applyPathUpdate = getPathUpdater(newPosition);
-      setPath(applyPathUpdate);
-    },
-    [setPath],
-  );
-
-  return [path, updatePath];
-}
-
-function getPathUpdater(
-  newPosition: GeolocationPosition,
-): (prev: CurrentPath) => CurrentPath {
-  const updater: ReturnType<typeof getPathUpdater> = (prevPath: CurrentPath) => {
-    if (prevPath === null) {
-      return {
-        id: createPathId(),
-        color: 'pink',
-        positions: [],
-      };
-    }
-
-    const newPositions = prevPath.positions.concat(newPosition);
-
-    return { ...prevPath, positions: newPositions };
-  };
-  return updater;
-}
-
-function createPathId(): string {
-  const date = new Date();
-  return date.toISOString();
 }

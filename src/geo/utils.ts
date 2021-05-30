@@ -1,6 +1,6 @@
-export function getLatLngTuple(
-  position: GeolocationPosition | null,
-): L.LatLngTuple | null {
+import { Position } from '../db/model';
+
+export function getLatLngTuple(position: Position | null): L.LatLngTuple | null {
   if (position === null) {
     return null;
   }

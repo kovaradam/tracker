@@ -1,28 +1,87 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { styled } from '@linaria/react';
+import { useUpdate } from 'indexeddb-hooked';
 
+import { StoreName } from '../../db/config';
+import { Path } from '../../db/model';
+import { useCurrentPath } from '../../tracker/use-current-path';
 import { useTracker } from '../../tracker/use-tracker';
+import { formatTime } from '../../utils/format-time';
 import Dialog from '../Dialog';
 
 type Props = { hide: () => void };
 
 const PathDialog: React.FC<Props> = ({ hide }) => {
   const [, { currentPath }] = useTracker();
+  const [update] = useUpdate<Omit<Path, 'id'>>();
+  const deletePath = useCurrentPath()[2];
+
+  const elapsedTime = useMemo(() => {
+    const fallbackValue = '0';
+    if (!currentPath) {
+      return fallbackValue;
+    }
+    const timestamps = currentPath.positions.map(({ timestamp }) => timestamp);
+    if (!timestamps || timestamps.length < 2) {
+      return fallbackValue;
+    }
+    const timeInSeconds = Math.round(
+      (timestamps[timestamps.length - 1] - timestamps[0]) / 1000,
+    );
+    if (timeInSeconds < 60) {
+      return `${timeInSeconds} sec`;
+    }
+    const minutes = Math.round(timeInSeconds / 60) % 60;
+    if (minutes < 60) {
+      return `${minutes} minute${minutes === 1 ? 's' : ''}, ${timeInSeconds % 60} sec`;
+    }
+    const hours = Math.round(timeInSeconds / 3600);
+    return `${hours} hour${hours === 1 ? 's' : ''}, ${minutes % 60} min`;
+  }, [currentPath]);
+
+  const savePath = useCallback(() => {
+    if (!currentPath) {
+      hide();
+      return;
+    }
+    const positions =
+      currentPath.positions.map(({ coords, timestamp }) => ({
+        coords: {
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        },
+        timestamp,
+      })) || [];
+    const newRecord = {
+      color: currentPath.color,
+      positions,
+    };
+    update(StoreName.PATHS, {
+      value: newRecord,
+    });
+    hide();
+    deletePath();
+  }, [hide, currentPath, update, deletePath]);
+
+  const discardPath = useCallback(() => {
+    hide();
+    deletePath();
+  }, [hide, deletePath]);
 
   return (
     <Dialog>
+      <Dialog.Header>New entry</Dialog.Header>
       <S.Form>
-        <Dialog.FormValue label="name">
-          <S.Input />
-        </Dialog.FormValue>
         <Dialog.FormValue label="length">5 km</Dialog.FormValue>
-        <Dialog.FormValue label="duration">3 h</Dialog.FormValue>
-        <Dialog.FormValue label="date">30.5.2021</Dialog.FormValue>
+        <Dialog.FormValue label="duration">{elapsedTime}</Dialog.FormValue>
+        <Dialog.FormValue label="date">
+          {new Date().toLocaleDateString()}
+        </Dialog.FormValue>
       </S.Form>
       <S.ButtonWrapper>
-        <S.Button onClick={hide}>Save</S.Button>
-        <S.Button onClick={hide} color="#ff71718a">
+        <S.Button onClick={savePath}>Save</S.Button>
+        <S.Button onClick={discardPath} color="#ff0a0a8a">
           Discard
         </S.Button>
       </S.ButtonWrapper>
@@ -75,7 +134,8 @@ const S = {
     } ;
   `,
   Form: styled.form`
-    padding: 1rem;
+    padding: 0 1rem;
+    flex-grow: 1;
   `,
   ButtonWrapper: styled.div`
     width: 100%;
@@ -86,20 +146,13 @@ const S = {
   Button: styled.button<{ color?: string }>`
     color: ${({ color }) => color || 'auto'};
     font-size: 1.5rem;
-    padding: 0.5rem 0;
-    margin: 0.5rem 0;
+    padding: 1rem 0;
     box-sizing: border-box;
     width: 50%;
+    border: 0px solid #bbb8b8;
+    border-top-width: 1px;
     &:first-child {
-      border-right: 1px solid #bbb8b8;
+      border-right-width: 1px;
     }
-  `,
-  Input: styled.input`
-    border-style: none;
-    width: 100%;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    height: 2rem;
   `,
 };

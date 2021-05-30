@@ -1,5 +1,10 @@
+export type Position = {
+  coords: Pick<GeolocationCoordinates, 'latitude' | 'longitude'>;
+  timestamp: number;
+};
+
 export type Path = {
-  id: string;
-  positions: GeolocationPosition[];
+  id: number;
+  positions: Position[];
   color: string;
 };

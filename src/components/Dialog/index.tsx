@@ -3,8 +3,9 @@ import React from 'react';
 import { styled } from '@linaria/react';
 
 import FormValue from './FormValue';
+import Header from './Header';
 
-type CompoundType = React.FC & { FormValue: typeof FormValue };
+type CompoundType = React.FC & { FormValue: typeof FormValue; Header: typeof Header };
 
 const Dialog: CompoundType = ({ children }) => {
   return (
@@ -14,9 +15,10 @@ const Dialog: CompoundType = ({ children }) => {
   );
 };
 
-export default Dialog;
-
 Dialog.FormValue = FormValue;
+Dialog.Header = Header;
+
+export default Dialog;
 
 const S = {
   Overlay: styled.div`

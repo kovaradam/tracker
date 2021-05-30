@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useRef } from 'react';
 
 import { styled } from '@linaria/react';
 
+import { formatTime } from '../../utils/format-time';
+
 type Props = { className?: string; isActive: boolean };
 
 const defaultValue = formatTime(0);
@@ -65,16 +67,4 @@ function* createTimeIterator(initValue = 1) {
   while (true) {
     yield i++;
   }
-}
-
-function formatTime(timeInSeconds: number): string {
-  const seconds = timeInSeconds % 60;
-  const minutes = Math.round(timeInSeconds / 60) % 60;
-  const hours = Math.round(timeInSeconds / 3600);
-
-  function padValue(input: number): string {
-    return `${input}`.padStart(2, '0');
-  }
-
-  return `${padValue(hours)}:${padValue(minutes)}:${padValue(seconds)}`;
 }
