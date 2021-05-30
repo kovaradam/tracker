@@ -3,6 +3,7 @@ import React from 'react';
 import { styled } from '@linaria/react';
 
 import { useTracker } from '../../tracker/use-tracker';
+import Dialog from '../Dialog';
 
 type Props = { hide: () => void };
 
@@ -10,15 +11,22 @@ const PathDialog: React.FC<Props> = ({ hide }) => {
   const [, { currentPath }] = useTracker();
 
   return (
-    <S.Overlay onClick={hide}>
-      <S.Wrapper>
-        <S.Form></S.Form>
-        <S.ButtonWrapper>
-          <S.Button>Save</S.Button>
-          <S.Button color="#ff71718a">Discard</S.Button>
-        </S.ButtonWrapper>
-      </S.Wrapper>
-    </S.Overlay>
+    <Dialog>
+      <S.Form>
+        <Dialog.FormValue label="name">
+          <S.Input />
+        </Dialog.FormValue>
+        <Dialog.FormValue label="length">5 km</Dialog.FormValue>
+        <Dialog.FormValue label="duration">3 h</Dialog.FormValue>
+        <Dialog.FormValue label="date">30.5.2021</Dialog.FormValue>
+      </S.Form>
+      <S.ButtonWrapper>
+        <S.Button onClick={hide}>Save</S.Button>
+        <S.Button onClick={hide} color="#ff71718a">
+          Discard
+        </S.Button>
+      </S.ButtonWrapper>
+    </Dialog>
   );
 };
 
@@ -66,7 +74,9 @@ const S = {
       }
     } ;
   `,
-  Form: styled.form``,
+  Form: styled.form`
+    padding: 1rem;
+  `,
   ButtonWrapper: styled.div`
     width: 100%;
     height: min-content;
@@ -83,5 +93,13 @@ const S = {
     &:first-child {
       border-right: 1px solid #bbb8b8;
     }
+  `,
+  Input: styled.input`
+    border-style: none;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    height: 2rem;
   `,
 };
