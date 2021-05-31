@@ -26,9 +26,7 @@ const Path: React.FC<Props> = (props) => {
     if (!map) {
       return;
     }
-    if (persisted.current.line) {
-      persisted.current.line.remove();
-    }
+
     persisted.current.line = L.polyline(points as L.LatLngTuple[]);
     persisted.current.line.setStyle({ color, className: pathStyle });
     persisted.current.line.addTo(map);
@@ -49,19 +47,13 @@ const Path: React.FC<Props> = (props) => {
 
   // on map init
   useEffect(() => {
-    if (!map) return;
-    updateLine();
-  }, [map]);
-
-  useEffect(() => {
     updateLine();
     const { line, marker } = persisted.current;
-
     return () => {
       line?.remove();
       marker?.remove();
     };
-  }, [points, color]);
+  }, [map, points, color]);
 
   return null;
 };

@@ -7,7 +7,6 @@ import { StoreName } from '../../db/config';
 import { Path } from '../../db/model';
 import { useCurrentPath } from '../../tracker/use-current-path';
 import { useTracker } from '../../tracker/use-tracker';
-import { formatTime } from '../../utils/format-time';
 import Dialog from '../Dialog';
 
 type Props = { hide: () => void };
@@ -18,7 +17,7 @@ const PathDialog: React.FC<Props> = ({ hide }) => {
   const deletePath = useCurrentPath()[2];
 
   const elapsedTime = useMemo(() => {
-    const fallbackValue = '0';
+    const fallbackValue = '0 sec';
     if (!currentPath) {
       return fallbackValue;
     }

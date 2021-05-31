@@ -1,4 +1,5 @@
 import { Position } from '../db/model';
+import MockGeolocation from './mock-geolocation';
 
 export function getLatLngTuple(position: Position | null): L.LatLngTuple | null {
   if (position === null) {
@@ -8,16 +9,19 @@ export function getLatLngTuple(position: Position | null): L.LatLngTuple | null 
   return [latitude, longitude];
 }
 
+const geolocation =
+  import.meta.env.MODE === 'production' ? navigator.geolocation : MockGeolocation;
+
 export function watchPosition(
   onSuccess: PositionCallback,
   onError?: PositionErrorCallback,
   options?: PositionOptions,
 ): (() => void) | undefined {
   let clear: ReturnType<typeof watchPosition> = undefined;
-  if (navigator.geolocation) {
-    const id = navigator.geolocation.watchPosition(onSuccess, onError, options);
+  if (geolocation) {
+    const id = geolocation.watchPosition(onSuccess, onError, { timeout: 1000 });
     clear = (): void => {
-      navigator.geolocation.clearWatch(id);
+      geolocation.clearWatch(id);
     };
   } else {
     if (onError) {
