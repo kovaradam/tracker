@@ -18,7 +18,7 @@ const PathDialog: React.FC<Props> = ({ hide }) => {
   const deletePath = useCurrentPath()[2];
 
   const elapsedTime = useMemo(() => {
-    const fallbackValue = '0 seconds';
+    const fallbackValue = formatDuration(0);
     if (!currentPath) {
       return fallbackValue;
     }
@@ -33,7 +33,7 @@ const PathDialog: React.FC<Props> = ({ hide }) => {
   }, [currentPath]);
 
   const pathDistance = useMemo(() => {
-    const fallbackValue = '0 m';
+    const fallbackValue = formatDistance(0);
     if (!currentPath) {
       return fallbackValue;
     }
@@ -42,7 +42,7 @@ const PathDialog: React.FC<Props> = ({ hide }) => {
       return fallbackValue;
     }
     let sum = 0;
-    positions.reduceRight((prev, current) => {
+    positions.reduce((prev, current) => {
       sum += getPositionDistance(prev, current);
       return current;
     });
