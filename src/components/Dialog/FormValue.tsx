@@ -27,6 +27,6 @@ const S = {
     margin-bottom: 0.2rem;
   `,
   Content: styled.span`
-    font-size: 2rem; ;
+    font-size: 2rem;
   `,
 };

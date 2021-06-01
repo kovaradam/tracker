@@ -8,7 +8,8 @@ import { FaCircle, FaLocationArrow } from 'react-icons/fa';
 
 import { getLatLngTuple } from '../../geo/utils';
 import useMap from '../../map/use-map';
-import { useTracker, CurrentPath } from '../../tracker/use-tracker';
+import { CurrentPath } from '../../tracker/use-current-path';
+import { useTracker } from '../../tracker/use-tracker';
 
 type Props = { isActive: boolean };
 

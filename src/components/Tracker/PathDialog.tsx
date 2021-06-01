@@ -7,6 +7,7 @@ import { StoreName } from '../../db/config';
 import { Path } from '../../db/model';
 import { useCurrentPath } from '../../tracker/use-current-path';
 import { useTracker } from '../../tracker/use-tracker';
+import { getPositionDistance } from '../../utils/position-distance';
 import Dialog from '../Dialog';
 
 type Props = { hide: () => void };
@@ -17,7 +18,7 @@ const PathDialog: React.FC<Props> = ({ hide }) => {
   const deletePath = useCurrentPath()[2];
 
   const elapsedTime = useMemo(() => {
-    const fallbackValue = '0 sec';
+    const fallbackValue = '0 seconds';
     if (!currentPath) {
       return fallbackValue;
     }
@@ -28,15 +29,24 @@ const PathDialog: React.FC<Props> = ({ hide }) => {
     const timeInSeconds = Math.round(
       (timestamps[timestamps.length - 1] - timestamps[0]) / 1000,
     );
-    if (timeInSeconds < 60) {
-      return `${timeInSeconds} sec`;
+    return formatDuration(timeInSeconds);
+  }, [currentPath]);
+
+  const pathDistance = useMemo(() => {
+    const fallbackValue = '0 m';
+    if (!currentPath) {
+      return fallbackValue;
     }
-    const minutes = Math.round(timeInSeconds / 60) % 60;
-    if (minutes < 60) {
-      return `${minutes} minute${minutes > 1 ? 's' : ''}, ${timeInSeconds % 60} sec`;
+    const positions = currentPath.positions.filter((position) => position !== null);
+    if (!positions || positions.length < 2) {
+      return fallbackValue;
     }
-    const hours = Math.round(timeInSeconds / 3600);
-    return `${hours} hour${hours > 1 ? 's' : ''}, ${minutes % 60} min`;
+    let sum = 0;
+    positions.reduceRight((prev, current) => {
+      sum += getPositionDistance(prev, current);
+      return current;
+    });
+    return formatDistance(sum);
   }, [currentPath]);
 
   const savePath = useCallback(() => {
@@ -72,7 +82,7 @@ const PathDialog: React.FC<Props> = ({ hide }) => {
     <Dialog>
       <Dialog.Header>New entry</Dialog.Header>
       <S.Form>
-        <Dialog.FormValue label="length">5 km</Dialog.FormValue>
+        <Dialog.FormValue label="length">{pathDistance}</Dialog.FormValue>
         <Dialog.FormValue label="duration">{elapsedTime}</Dialog.FormValue>
         <Dialog.FormValue label="date">
           {new Date().toLocaleDateString()}
@@ -89,6 +99,27 @@ const PathDialog: React.FC<Props> = ({ hide }) => {
 };
 
 export default PathDialog;
+
+function formatDistance(inputInMeters: number): string {
+  const meters = Math.round(inputInMeters);
+  if (meters < 1000) {
+    return `${meters} meter${meters === 1 ? '' : 's'}`;
+  }
+  const km = Math.round(meters / 1000);
+  return `${km}.${meters % 1000} km`;
+}
+
+function formatDuration(timeInSeconds: number): string {
+  if (timeInSeconds < 60) {
+    return `${timeInSeconds} seconds`;
+  }
+  const minutes = Math.round(timeInSeconds / 60) % 60;
+  if (minutes < 60) {
+    return `${minutes} minute${minutes > 1 ? 's' : ''}, ${timeInSeconds % 60} sec`;
+  }
+  const hours = Math.round(timeInSeconds / 3600);
+  return `${hours} hour${hours > 1 ? 's' : ''}, ${minutes % 60} min`;
+}
 
 const S = {
   Overlay: styled.div`
