@@ -21,6 +21,14 @@ const Timer: React.FC<Props> = ({ className, isActive }) => {
     [element],
   );
 
+  const updateTimeSinceStart = useCallback(
+    (timeGenerator: Generator<number>): void => {
+      const secondsSinceStart = timeGenerator.next();
+      setElementContent(formatTime(secondsSinceStart.value));
+    },
+    [setElementContent],
+  );
+
   useEffect(() => {
     if (!isActive) {
       return;
@@ -29,13 +37,12 @@ const Timer: React.FC<Props> = ({ className, isActive }) => {
       updateTimeSinceStart,
       timerDelayInMs,
       createTimeIterator(),
-      (timeInSeconds: number) => setElementContent(formatTime(timeInSeconds)),
     );
     return () => {
       clearInterval(intervald);
       setElementContent(defaultValue);
     };
-  }, [setElementContent, isActive]);
+  }, [setElementContent, isActive, updateTimeSinceStart]);
 
   return (
     <TimeWrapper ref={element} className={className}>
@@ -53,14 +60,6 @@ const TimeWrapper = styled.code`
   border-radius: 5px;
   padding: 0 5px;
 `;
-
-function updateTimeSinceStart(
-  timeGenerator: Generator<number>,
-  elementUpdater: (time: number) => void,
-): void {
-  const secondsSinceStart = timeGenerator.next();
-  elementUpdater(secondsSinceStart.value);
-}
 
 function* createTimeIterator(initValue = 1) {
   let i = initValue;

@@ -21,7 +21,7 @@ class MockGeolocation {
   private static generatePosition = (): GeolocationPosition => {
     const { coords, timestamp: prevTimestamp } = MockGeolocation.position;
     const timestamp = prevTimestamp + 1000;
-    const generateNextDirection = () => withRandomSign(Math.random() / 100);
+    const generateNextDirection = () => withRandomSign(Math.random() / 1000);
     const latitude = coords.latitude + generateNextDirection();
     const longitude = coords.longitude + generateNextDirection();
     const newPosition = {

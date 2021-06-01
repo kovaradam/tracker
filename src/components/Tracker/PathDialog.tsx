@@ -33,10 +33,10 @@ const PathDialog: React.FC<Props> = ({ hide }) => {
     }
     const minutes = Math.round(timeInSeconds / 60) % 60;
     if (minutes < 60) {
-      return `${minutes} minute${minutes === 1 ? 's' : ''}, ${timeInSeconds % 60} sec`;
+      return `${minutes} minute${minutes > 1 ? 's' : ''}, ${timeInSeconds % 60} sec`;
     }
     const hours = Math.round(timeInSeconds / 3600);
-    return `${hours} hour${hours === 1 ? 's' : ''}, ${minutes % 60} min`;
+    return `${hours} hour${hours > 1 ? 's' : ''}, ${minutes % 60} min`;
   }, [currentPath]);
 
   const savePath = useCallback(() => {

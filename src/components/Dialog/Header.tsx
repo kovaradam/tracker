@@ -13,5 +13,5 @@ const Wrapper = styled.header`
   display: flex;
   align-content: center;
   padding: 1rem;
-  color: #a52a2a75;
+  color: #bbb8b8;
 `;
