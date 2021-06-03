@@ -1,6 +1,7 @@
 import React, { useCallback, useReducer } from 'react';
 
 import { styled } from '@linaria/react';
+import { atom, useAtom } from 'jotai';
 import { FiX } from 'react-icons/fi';
 import { GoThreeBars } from 'react-icons/go';
 import { MdCenterFocusWeak } from 'react-icons/md';
@@ -9,13 +10,17 @@ import useMap from '../../map/use-map';
 import { useTracker } from '../../tracker/use-tracker';
 import { TrackerWrapperComponent } from './';
 import Message from './Message';
-import PathDialog from './PathDialog';
+import NewPathDialog from './NewPathDialog';
+import PathDetailDialog from './PathDetailDialog';
 import Timer from './Timer';
+
+export const selectedPathIdAtom = atom<null | number>(null);
 
 const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
   const [, { end, start, isTracking }] = useTracker();
   const [, { centerMapView }] = useMap();
   const [isPathDialogVisible, toggleIsPathDialogVisible] = useReducer((p) => !p, false);
+  const [selectedPathId, setSelectedPathId] = useAtom(selectedPathIdAtom);
 
   const toggleTracker = useCallback(() => {
     if (isTracking) {
@@ -45,7 +50,10 @@ const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
       <S.BottomPanelWrapper isVisible={isTracking}>
         <Timer isActive={isTracking} />
       </S.BottomPanelWrapper>
-      {isPathDialogVisible && <PathDialog hide={toggleIsPathDialogVisible} />}
+      {isPathDialogVisible && <NewPathDialog hide={toggleIsPathDialogVisible} />}
+      {selectedPathId && (
+        <PathDetailDialog id={selectedPathId} hide={() => setSelectedPathId(null)} />
+      )}
     </S.Wrapper>
   );
 };

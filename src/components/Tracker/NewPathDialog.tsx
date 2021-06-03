@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 
 import { styled } from '@linaria/react';
 import { useUpdate } from 'indexeddb-hooked';
@@ -7,47 +7,15 @@ import { StoreName } from '../../db/config';
 import { Path } from '../../db/model';
 import { useCurrentPath } from '../../tracker/use-current-path';
 import { useTracker } from '../../tracker/use-tracker';
-import { getPositionDistance } from '../../utils/position-distance';
 import Dialog from '../Dialog';
+import PathDetail from './PathDetail';
 
 type Props = { hide: () => void };
 
-const PathDialog: React.FC<Props> = ({ hide }) => {
+const NewPathDialog: React.FC<Props> = ({ hide }) => {
   const [, { currentPath }] = useTracker();
   const [update] = useUpdate<Omit<Path, 'id'>>();
   const deletePath = useCurrentPath()[2];
-
-  const elapsedTime = useMemo(() => {
-    const fallbackValue = formatDuration(0);
-    if (!currentPath) {
-      return fallbackValue;
-    }
-    const timestamps = currentPath.positions.map(({ timestamp }) => timestamp);
-    if (!timestamps || timestamps.length < 2) {
-      return fallbackValue;
-    }
-    const timeInSeconds = Math.round(
-      (timestamps[timestamps.length - 1] - timestamps[0]) / 1000,
-    );
-    return formatDuration(timeInSeconds);
-  }, [currentPath]);
-
-  const pathDistance = useMemo(() => {
-    const fallbackValue = formatDistance(0);
-    if (!currentPath) {
-      return fallbackValue;
-    }
-    const positions = currentPath.positions.filter((position) => position !== null);
-    if (!positions || positions.length < 2) {
-      return fallbackValue;
-    }
-    let sum = 0;
-    positions.reduce((prev, current) => {
-      sum += getPositionDistance(prev, current);
-      return current;
-    });
-    return formatDistance(sum);
-  }, [currentPath]);
 
   const savePath = useCallback(() => {
     if (!currentPath) {
@@ -81,13 +49,7 @@ const PathDialog: React.FC<Props> = ({ hide }) => {
   return (
     <Dialog>
       <Dialog.Header>New entry</Dialog.Header>
-      <S.Form>
-        <Dialog.FormValue label="length">{pathDistance}</Dialog.FormValue>
-        <Dialog.FormValue label="duration">{elapsedTime}</Dialog.FormValue>
-        <Dialog.FormValue label="date">
-          {new Date().toLocaleDateString()}
-        </Dialog.FormValue>
-      </S.Form>
+      {currentPath && <PathDetail path={currentPath} />}
       <S.ButtonWrapper>
         <S.Button onClick={savePath}>Save</S.Button>
         <S.Button onClick={discardPath} color="#ff0a0a8a">
@@ -98,28 +60,7 @@ const PathDialog: React.FC<Props> = ({ hide }) => {
   );
 };
 
-export default PathDialog;
-
-function formatDistance(inputInMeters: number): string {
-  const meters = Math.round(inputInMeters);
-  if (meters < 1000) {
-    return `${meters} meter${meters === 1 ? '' : 's'}`;
-  }
-  const km = Math.round(meters / 1000);
-  return `${km}.${meters % 1000} km`;
-}
-
-function formatDuration(timeInSeconds: number): string {
-  if (timeInSeconds < 60) {
-    return `${timeInSeconds} seconds`;
-  }
-  const minutes = Math.round(timeInSeconds / 60) % 60;
-  if (minutes < 60) {
-    return `${minutes} minute${minutes > 1 ? 's' : ''}, ${timeInSeconds % 60} sec`;
-  }
-  const hours = Math.round(timeInSeconds / 3600);
-  return `${hours} hour${hours > 1 ? 's' : ''}, ${minutes % 60} min`;
-}
+export default NewPathDialog;
 
 const S = {
   Overlay: styled.div`
@@ -163,26 +104,26 @@ const S = {
       }
     } ;
   `,
-  Form: styled.form`
-    padding: 0 1rem;
-    flex-grow: 1;
-  `,
+
   ButtonWrapper: styled.div`
     width: 100%;
     height: min-content;
     display: flex;
     justify-content: space-around;
   `,
-  Button: styled.button<{ color?: string }>`
+  Button: styled(Dialog.Button)<{ color?: string }>`
     color: ${({ color }) => color || 'auto'};
-    font-size: 1.5rem;
-    padding: 1rem 0;
+    font-size: 1.2rem;
+    padding: 0.8rem 0;
     box-sizing: border-box;
     width: 50%;
-    border: 0px solid #bbb8b8;
+    border: 0px solid #bbb8b842;
     border-top-width: 1px;
     &:first-child {
       border-right-width: 1px;
+    }
+    &:active {
+      background-color: #f5f5f5;
     }
   `,
 };
