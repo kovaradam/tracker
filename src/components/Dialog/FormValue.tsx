@@ -20,13 +20,13 @@ const S = {
     height: min-content;
     display: flex;
     flex-direction: column;
-    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
   `,
   Label: styled.label`
     color: #a52a2a75;
     margin-bottom: 0.2rem;
   `,
   Content: styled.span`
-    font-size: 2rem;
+    font-size: 1.3rem;
   `,
 };

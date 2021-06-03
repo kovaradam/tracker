@@ -3,12 +3,14 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { css } from '@linaria/core';
 import { styled } from '@linaria/react';
+import { useAtom } from 'jotai';
 import * as L from 'leaflet';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 
 import { Path as PathType, Position } from '../../db/model';
 import { getLatLngTuple } from '../../geo/utils';
 import useMap from '../../map/use-map';
+import { selectedPathIdAtom } from '../Tracker/TrackerControls';
 import { createMarkerIcon } from './UserMarker';
 
 type Props = PathType & { showMarker?: boolean };
@@ -21,6 +23,7 @@ const Path: React.FC<Props> = (props) => {
     line: undefined,
     marker: undefined,
   });
+  const [, setSelectedPathId] = useAtom(selectedPathIdAtom);
 
   const updateLine = useCallback(() => {
     if (!map) {
@@ -49,6 +52,8 @@ const Path: React.FC<Props> = (props) => {
   useEffect(() => {
     updateLine();
     const { line, marker } = persisted.current;
+    marker?.addEventListener('click', () => setSelectedPathId(id));
+
     return () => {
       line?.remove();
       marker?.remove();

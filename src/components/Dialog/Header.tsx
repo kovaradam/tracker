@@ -1,17 +1,10 @@
-import React from 'react';
-
 import { styled } from '@linaria/react';
 
-const Header: React.FC = ({ children }) => {
-  return <Wrapper>{children}</Wrapper>;
-};
-
-export default Header;
-
-const Wrapper = styled.header`
+const Header = styled.header`
   font-size: 2rem;
   display: flex;
   align-content: center;
   padding: 1rem;
-  color: #bbb8b8;
+  color: #6b3a3a;
 `;
+export default Header;

@@ -19,7 +19,7 @@ const defaultPaths: Path[] = [
         timestamp: 1621773352155,
       },
     ],
-    color: 'blue',
+    color: '#0078a8',
   },
   {
     id: 1,
@@ -33,7 +33,7 @@ const defaultPaths: Path[] = [
         timestamp: 1621773352155,
       },
     ],
-    color: 'yellow',
+    color: '#9a3f50',
   },
 ];
 

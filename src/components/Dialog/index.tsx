@@ -2,21 +2,31 @@ import React from 'react';
 
 import { styled } from '@linaria/react';
 
+import useOnClickOutside from '../../utils/use-on-click-outside';
+import Button from './Button';
 import FormValue from './FormValue';
 import Header from './Header';
 
-type CompoundType = React.FC & { FormValue: typeof FormValue; Header: typeof Header };
+type Props = { onOverlayClick?: () => void };
 
-const Dialog: CompoundType = ({ children }) => {
+type CompoundType = React.FC<Props> & {
+  FormValue: typeof FormValue;
+  Header: typeof Header;
+  Button: typeof Button;
+};
+
+const Dialog: CompoundType = ({ children, onOverlayClick }) => {
+  const wrapperElement = useOnClickOutside<HTMLDivElement>(onOverlayClick);
   return (
     <S.Overlay>
-      <S.Wrapper>{children}</S.Wrapper>
+      <S.Wrapper ref={wrapperElement}>{children}</S.Wrapper>
     </S.Overlay>
   );
 };
 
 Dialog.FormValue = FormValue;
 Dialog.Header = Header;
+Dialog.Button = Button;
 
 export default Dialog;
 
@@ -52,6 +62,7 @@ const S = {
     flex-direction: column;
     justify-content: space-between;
     animation: show 200ms;
+    overflow: hidden;
 
     @keyframes show {
       from {
