@@ -51,7 +51,7 @@ const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
         <Timer isActive={isTracking} />
       </S.BottomPanelWrapper>
       {isPathDialogVisible && <NewPathDialog hide={toggleIsPathDialogVisible} />}
-      {selectedPathId && (
+      {selectedPathId !== null && (
         <PathDetailDialog id={selectedPathId} hide={() => setSelectedPathId(null)} />
       )}
     </S.Wrapper>

@@ -1,16 +1,63 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 
 import { styled } from '@linaria/react';
-import { GiPathDistance, IoIosTimer, BiCalendarWeek } from 'react-icons/all';
+import { read, update } from 'indexeddb-hooked';
+import {
+  GiPathDistance,
+  IoIosTimer,
+  BiCalendarWeek,
+  HiOutlineColorSwatch,
+} from 'react-icons/all';
 
+import { StoreName } from '../../db/config';
 import { Path } from '../../db/model';
+import { pathColors } from '../../style';
+import { CurrentPath } from '../../tracker/use-current-path';
+import { useTracker } from '../../tracker/use-tracker';
 import { getPositionDistance } from '../../utils/position-distance';
 import useAnimatedValueLoading from '../../utils/use-loading-value';
 import Dialog from '../Dialog';
 
-type Props = { path: Path };
+type Props = { path: Path; updatePath?: (path: NonNullable<CurrentPath>) => void };
 
-const PathDetail: React.FC<Props> = ({ path }) => {
+const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
+  const [, { currentPath }] = useTracker();
+  const [, forceUpdate] = useReducer((p) => !p, false);
+  const persistedColor = useRef(path.color);
+
+  const isNewPath = currentPath !== null;
+
+  useEffect(
+    () => () => {
+      // update color on unmount
+      if (isNewPath) {
+        return;
+      }
+      read(StoreName.PATHS, { key: path.id }).then((result) => {
+        if (!result) {
+          return;
+        }
+        update(StoreName.PATHS, {
+          key: path.id,
+          value: { color: persistedColor.current },
+        });
+      });
+    },
+    [path.id, currentPath, isNewPath],
+  );
+
+  const setCurrentColor = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, color: string) => {
+      event.preventDefault();
+      persistedColor.current = color;
+      forceUpdate();
+      if (isNewPath) {
+        updatePath?.({ ...path, color });
+      }
+    },
+    [persistedColor, forceUpdate, updatePath, path, isNewPath],
+  );
+
   const duration = useMemo(() => {
     const fallbackValue = 0;
     if (!path) {
@@ -63,15 +110,23 @@ const PathDetail: React.FC<Props> = ({ path }) => {
       <Dialog.FormValue
         ref={distanceFormElement}
         label={[<GiPathDistance />, 'length']}
-      ></Dialog.FormValue>
-      <Dialog.FormValue
-        ref={durationFormElement}
-        label={[<IoIosTimer />, 'duration']}
-      ></Dialog.FormValue>
+      />
+      <Dialog.FormValue ref={durationFormElement} label={[<IoIosTimer />, 'duration']} />
       <Dialog.FormValue label={[<BiCalendarWeek />, 'date']}>
         {getDate()}
       </Dialog.FormValue>
-      <div />
+      <Dialog.FormValue label={[<HiOutlineColorSwatch />, 'color']}>
+        <S.ColorPicker>
+          {pathColors.map((color) => (
+            <S.ColorOptionButton
+              onClick={(event) => setCurrentColor(event, color)}
+              fill={color}
+              key={color}
+              active={color === persistedColor.current}
+            />
+          ))}
+        </S.ColorPicker>
+      </Dialog.FormValue>
     </S.Wrapper>
   );
 };
@@ -108,5 +163,21 @@ const S = {
     padding: 0 1rem;
     flex-grow: 1;
     overflow-y: scroll;
+  `,
+  ColorPicker: styled.menu`
+    margin: 0;
+    padding: 0;
+    display: flex;
+  `,
+  ColorOptionButton: styled.button<{ fill: string; active: boolean }>`
+    background-color: ${({ fill }) => fill};
+    --size: 1.2rem;
+    width: var(--size);
+    height: var(--size);
+    margin-right: 0.5rem;
+    border-radius: 2px;
+    opacity: ${({ active }): number => (active ? 1 : 0.5)};
+    box-shadow: ${({ active, fill }): string =>
+      active ? `0 0 0px 4px ${fill}99` : 'none'};
   `,
 };

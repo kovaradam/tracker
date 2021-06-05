@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer } from 'react';
+import React, { useCallback, useReducer, useState } from 'react';
 
 import { styled } from '@linaria/react';
 import { useRead, useUpdate } from 'indexeddb-hooked';
@@ -39,12 +39,12 @@ const PathDetailDialog: React.FC<Props> = ({ id, hide }) => {
 export default PathDetailDialog;
 
 const MenuWrapper: React.FC = ({ children }) => {
-  const [isMenuOpen, toggleIsMenuOpen] = useReducer((p) => !p, false);
-  const wrapperElement = useOnClickOutside<HTMLDivElement>(toggleIsMenuOpen);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const wrapperElement = useOnClickOutside<HTMLDivElement>(() => setIsMenuOpen(false));
 
   return (
     <S.MenuWrapper ref={wrapperElement}>
-      <S.OptionsButton onClick={toggleIsMenuOpen}>
+      <S.OptionsButton onClick={() => setIsMenuOpen(true)}>
         <BsThreeDotsVertical />
       </S.OptionsButton>
       {isMenuOpen && <S.MenuContentWrapper>{children}</S.MenuContentWrapper>}

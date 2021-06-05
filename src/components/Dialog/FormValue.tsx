@@ -15,10 +15,10 @@ const FormValue = React.forwardRef<HTMLSpanElement, Props>(({ label, children },
       return;
     }
     const siblingPosition = getElementPositionInSiblings(wrapperElement.current);
-    const animationDelay = `${
-      baseAnimationDelay + animationDuration * siblingPosition
-    }ms`;
-    wrapperElement.current.style.animationDelay = animationDelay;
+    const animationDelay = baseAnimationDelay + animationDuration * siblingPosition;
+
+    wrapperElement.current.style.animationDelay = formatDuration(animationDelay);
+    wrapperElement.current.style.animationDuration = formatDuration(animationDuration);
   }, [wrapperElement]);
 
   return (
@@ -31,6 +31,10 @@ const FormValue = React.forwardRef<HTMLSpanElement, Props>(({ label, children },
 
 export default FormValue;
 
+function formatDuration(duration: number): string {
+  return `${duration}ms`;
+}
+
 function getElementPositionInSiblings(element: HTMLElement): number {
   let previousSibling = element.previousSibling;
   let i = 0;
@@ -42,8 +46,6 @@ function getElementPositionInSiblings(element: HTMLElement): number {
 
 const S = {
   Wrapper: styled.div`
-    --animation-time: 200ms;
-    --animation-init-delay: 100ms;
     height: 3.5rem;
     display: flex;
     flex-direction: column;
@@ -51,7 +53,7 @@ const S = {
     margin-bottom: 1.2rem;
     padding-left: 0.5rem;
     border-left: 2px dashed #a52a2a75;
-    animation: show var(--animation-time) forwards;
+    animation: show forwards;
     transform: scaleX(0);
     transform-origin: left;
 

@@ -1,11 +1,11 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 import { styled } from '@linaria/react';
 import { useUpdate } from 'indexeddb-hooked';
 
 import { StoreName } from '../../db/config';
 import { Path } from '../../db/model';
-import { useCurrentPath } from '../../tracker/use-current-path';
+import { CurrentPath, useCurrentPath } from '../../tracker/use-current-path';
 import { useTracker } from '../../tracker/use-tracker';
 import Dialog from '../Dialog';
 import PathDetail from './PathDetail';
@@ -17,13 +17,15 @@ const NewPathDialog: React.FC<Props> = ({ hide }) => {
   const [update] = useUpdate<Omit<Path, 'id'>>();
   const deletePath = useCurrentPath()[2];
 
+  const persistedPath = useRef(currentPath);
+
   const savePath = useCallback(() => {
-    if (!currentPath) {
+    if (!persistedPath.current) {
       hide();
       return;
     }
     const positions =
-      currentPath.positions.map(({ coords, timestamp }) => ({
+      persistedPath.current.positions.map(({ coords, timestamp }) => ({
         coords: {
           latitude: coords.latitude,
           longitude: coords.longitude,
@@ -31,7 +33,7 @@ const NewPathDialog: React.FC<Props> = ({ hide }) => {
         timestamp,
       })) || [];
     const newRecord = {
-      color: currentPath.color,
+      color: persistedPath.current.color,
       positions,
     };
     update(StoreName.PATHS, {
@@ -39,17 +41,26 @@ const NewPathDialog: React.FC<Props> = ({ hide }) => {
     });
     hide();
     deletePath();
-  }, [hide, currentPath, update, deletePath]);
+  }, [hide, persistedPath, update, deletePath]);
 
   const discardPath = useCallback(() => {
     hide();
     deletePath();
   }, [hide, deletePath]);
 
+  const updatePath = useCallback(
+    (path: NonNullable<CurrentPath>) => {
+      persistedPath.current = path;
+    },
+    [persistedPath],
+  );
+
   return (
     <Dialog>
       <Dialog.Header>New entry</Dialog.Header>
-      {currentPath && <PathDetail path={currentPath} />}
+      {persistedPath.current && (
+        <PathDetail updatePath={updatePath} path={persistedPath.current} />
+      )}
       <S.ButtonWrapper>
         <S.Button onClick={savePath}>Save</S.Button>
         <S.Button onClick={discardPath} color="var(--discard-red)">

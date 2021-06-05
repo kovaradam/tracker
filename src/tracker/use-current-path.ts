@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { atom, useAtom } from 'jotai';
 
 import { Path } from '../db/model';
+import { pathColors } from '../style';
 
 export type CurrentPath = Path | null;
 
@@ -54,10 +55,9 @@ function getPathUpdater(
 }
 
 function* createPathDataIterator(initValue = 0) {
-  const colors = ['pink', '#0078a8', '#9a3f50', '#ffffa8', '#6b9a6b'];
   let i = initValue;
   while (true) {
-    yield [i, colors[i++ % colors.length]];
+    yield [i, pathColors[i++ % pathColors.length]];
   }
 }
 const pathDataGenerator = createPathDataIterator();
