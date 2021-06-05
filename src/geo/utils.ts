@@ -18,16 +18,16 @@ export function watchPosition(
   options?: PositionOptions,
 ): (() => void) | undefined {
   let clear: ReturnType<typeof watchPosition> = undefined;
-  if (geolocation) {
-    const id = geolocation.watchPosition(onSuccess, onError, { timeout: 1000 });
-    clear = (): void => {
-      geolocation.clearWatch(id);
-    };
-  } else {
+  if (!geolocation) {
     if (onError) {
-      const error = { message: 'geolocation is not supported' };
+      const error = { message: 'Geolocation is not supported' };
       onError(error as GeolocationPositionError);
     }
+    return;
   }
+  const id = geolocation.watchPosition(onSuccess, onError, { timeout: 1000 });
+  clear = (): void => {
+    geolocation.clearWatch(id);
+  };
   return clear;
 }

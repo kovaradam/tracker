@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 
 import { styled } from '@linaria/react';
+import { GiPathDistance, IoIosTimer, BiCalendarWeek } from 'react-icons/all';
 
 import { Path } from '../../db/model';
 import { getPositionDistance } from '../../utils/position-distance';
@@ -43,9 +44,15 @@ const PathDetail: React.FC<Props> = ({ path }) => {
 
   return (
     <S.Wrapper>
-      <Dialog.FormValue label="length">{pathDistance}</Dialog.FormValue>
-      <Dialog.FormValue label="duration">{elapsedTime}</Dialog.FormValue>
-      <Dialog.FormValue label="date">{getDate()}</Dialog.FormValue>
+      <Dialog.FormValue label={[<GiPathDistance />, 'length']}>
+        {pathDistance}
+      </Dialog.FormValue>
+      <Dialog.FormValue label={[<IoIosTimer />, 'duration']}>
+        {elapsedTime}
+      </Dialog.FormValue>
+      <Dialog.FormValue label={[<BiCalendarWeek />, 'date']}>
+        {getDate()}
+      </Dialog.FormValue>
     </S.Wrapper>
   );
 };
