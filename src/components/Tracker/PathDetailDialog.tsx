@@ -83,13 +83,18 @@ const S = {
     display: flex;
     flex-direction: column;
     & > button {
-      padding: 0.4rem 2rem;
       border-top: 1px solid #8080801a;
+      padding: 0.6rem 2rem;
+      font-size: 1rem;
+      box-sizing: border-box;
       &:active {
         background-color: #8080801a;
       }
       &:first-child {
         border-top: none;
+      }
+      &:last-child {
+        color: var(--discard-red);
       }
     }
     animation: show 100ms;

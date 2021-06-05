@@ -52,7 +52,7 @@ const NewPathDialog: React.FC<Props> = ({ hide }) => {
       {currentPath && <PathDetail path={currentPath} />}
       <S.ButtonWrapper>
         <S.Button onClick={savePath}>Save</S.Button>
-        <S.Button onClick={discardPath} color="#ff0a0a8a">
+        <S.Button onClick={discardPath} color="var(--discard-red)">
           Discard
         </S.Button>
       </S.ButtonWrapper>

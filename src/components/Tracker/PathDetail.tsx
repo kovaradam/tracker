@@ -5,13 +5,14 @@ import { GiPathDistance, IoIosTimer, BiCalendarWeek } from 'react-icons/all';
 
 import { Path } from '../../db/model';
 import { getPositionDistance } from '../../utils/position-distance';
+import useAnimatedValueLoading from '../../utils/use-loading-value';
 import Dialog from '../Dialog';
 
 type Props = { path: Path };
 
 const PathDetail: React.FC<Props> = ({ path }) => {
-  const elapsedTime = useMemo(() => {
-    const fallbackValue = formatDuration(0);
+  const duration = useMemo(() => {
+    const fallbackValue = 0;
     if (!path) {
       return fallbackValue;
     }
@@ -22,11 +23,11 @@ const PathDetail: React.FC<Props> = ({ path }) => {
     const timeInSeconds = Math.round(
       (timestamps[timestamps.length - 1] - timestamps[0]) / 1000,
     );
-    return formatDuration(timeInSeconds);
+    return timeInSeconds;
   }, [path]);
 
   const pathDistance = useMemo(() => {
-    const fallbackValue = formatDistance(0);
+    const fallbackValue = 0;
     if (!path) {
       return fallbackValue;
     }
@@ -39,20 +40,38 @@ const PathDetail: React.FC<Props> = ({ path }) => {
       sum += getPositionDistance(prev, current);
       return current;
     });
-    return formatDistance(sum);
+    return sum;
   }, [path]);
+
+  const distanceTarget = Math.round(pathDistance);
+  const distanceFormElement = useAnimatedValueLoading<HTMLSpanElement>({
+    target: distanceTarget,
+    rate: Math.round(5 * Math.round(distanceTarget / 1000)),
+    formatter: formatDistance,
+  });
+
+  const durationTarget = Math.round(duration);
+  const durationFormElement = useAnimatedValueLoading<HTMLSpanElement>({
+    target: durationTarget,
+    rate: 5 * Math.round(durationTarget / 1000),
+    duration: 500,
+    formatter: formatDuration,
+  });
 
   return (
     <S.Wrapper>
-      <Dialog.FormValue label={[<GiPathDistance />, 'length']}>
-        {pathDistance}
-      </Dialog.FormValue>
-      <Dialog.FormValue label={[<IoIosTimer />, 'duration']}>
-        {elapsedTime}
-      </Dialog.FormValue>
+      <Dialog.FormValue
+        ref={distanceFormElement}
+        label={[<GiPathDistance />, 'length']}
+      ></Dialog.FormValue>
+      <Dialog.FormValue
+        ref={durationFormElement}
+        label={[<IoIosTimer />, 'duration']}
+      ></Dialog.FormValue>
       <Dialog.FormValue label={[<BiCalendarWeek />, 'date']}>
         {getDate()}
       </Dialog.FormValue>
+      <div />
     </S.Wrapper>
   );
 };
@@ -76,7 +95,7 @@ function formatDuration(timeInSeconds: number): string {
   if (timeInSeconds < 60) {
     return `${timeInSeconds} seconds`;
   }
-  const minutes = Math.round(timeInSeconds / 60) % 60;
+  const minutes = Math.round(timeInSeconds / 60);
   if (minutes < 60) {
     return `${minutes} minute${minutes > 1 ? 's' : ''}, ${timeInSeconds % 60} sec`;
   }
@@ -88,5 +107,6 @@ const S = {
   Wrapper: styled.form`
     padding: 0 1rem;
     flex-grow: 1;
+    overflow-y: scroll;
   `,
 };
