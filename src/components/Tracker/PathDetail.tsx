@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 
+import { css } from '@linaria/core';
 import { styled } from '@linaria/react';
 import { read, update } from 'indexeddb-hooked';
 import {
@@ -15,7 +16,7 @@ import { pathColors } from '../../style';
 import { CurrentPath } from '../../tracker/use-current-path';
 import { useTracker } from '../../tracker/use-tracker';
 import { getPositionDistance } from '../../utils/position-distance';
-import useAnimatedValueLoading from '../../utils/use-loading-value';
+import useAnimatedValueLoading from '../../utils/use-animated-value';
 import Dialog from '../Dialog';
 
 type Props = { path: Path; updatePath?: (path: NonNullable<CurrentPath>) => void };
@@ -93,7 +94,7 @@ const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
   const distanceTarget = Math.round(pathDistance);
   const distanceFormElement = useAnimatedValueLoading<HTMLSpanElement>({
     target: distanceTarget,
-    rate: Math.round(5 * Math.round(distanceTarget / 1000)),
+    rate: Math.round(5 * (Math.round(distanceTarget / 1000) + 1)),
     formatter: formatDistance,
   });
 
@@ -105,8 +106,27 @@ const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
     formatter: formatDuration,
   });
 
+  const wrapperElement = useRef<HTMLFormElement | null>(null);
+
+  useEffect(() => {
+    const element = wrapperElement?.current;
+    function listener(): void {
+      if (!element) {
+        return;
+      }
+      const className = wrapperScrollStyle;
+      if (element.scrollTop > 0) {
+        element.classList.add(className);
+      } else {
+        element.classList.remove(className);
+      }
+    }
+    element?.addEventListener('scroll', listener);
+    return () => element?.removeEventListener('scroll', listener);
+  }, [wrapperElement]);
+
   return (
-    <S.Wrapper>
+    <S.Wrapper ref={wrapperElement}>
       <Dialog.FormValue
         ref={distanceFormElement}
         label={[<GiPathDistance />, 'length']}
@@ -158,11 +178,16 @@ function formatDuration(timeInSeconds: number): string {
   return `${hours} hour${hours > 1 ? 's' : ''}, ${minutes % 60} min`;
 }
 
+const wrapperScrollStyle = css`
+  box-shadow: 0px 6px 14px -9px #ecebeb inset;
+`;
+
 const S = {
   Wrapper: styled.form`
     padding: 0 1rem;
     flex-grow: 1;
     overflow-y: scroll;
+    transition: box-shadow 100ms;
   `,
   ColorPicker: styled.menu`
     margin: 0;

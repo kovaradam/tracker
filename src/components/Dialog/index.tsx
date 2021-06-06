@@ -3,7 +3,7 @@ import React from 'react';
 import { styled } from '@linaria/react';
 
 import useOnClickOutside from '../../utils/use-on-click-outside';
-import Button from './Button';
+import { Button, ActionButton } from './Buttons';
 import FormValue from './FormValue';
 import Header from './Header';
 
@@ -13,6 +13,7 @@ type CompoundType = React.FC<Props> & {
   FormValue: typeof FormValue;
   Header: typeof Header;
   Button: typeof Button;
+  ActionButton: typeof ActionButton;
 };
 
 const Dialog: CompoundType = ({ children, onOverlayClick }) => {
@@ -27,6 +28,7 @@ const Dialog: CompoundType = ({ children, onOverlayClick }) => {
 Dialog.FormValue = FormValue;
 Dialog.Header = Header;
 Dialog.Button = Button;
+Dialog.ActionButton = ActionButton;
 
 export default Dialog;
 

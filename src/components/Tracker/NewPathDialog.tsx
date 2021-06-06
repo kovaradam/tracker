@@ -122,14 +122,9 @@ const S = {
     display: flex;
     justify-content: space-around;
   `,
-  Button: styled(Dialog.Button)<{ color?: string }>`
+  Button: styled(Dialog.ActionButton)<{ color?: string }>`
     color: ${({ color }) => color || 'auto'};
-    font-size: 1.2rem;
-    padding: 0.8rem 0;
-    box-sizing: border-box;
     width: 50%;
-    border: 0px solid #bbb8b842;
-    border-top-width: 1px;
     &:first-child {
       border-right-width: 1px;
     }

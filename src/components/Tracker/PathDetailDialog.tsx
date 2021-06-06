@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { styled } from '@linaria/react';
 import { useRead, useUpdate } from 'indexeddb-hooked';
@@ -29,9 +29,8 @@ const PathDetailDialog: React.FC<Props> = ({ id, hide }) => {
           <button onClick={deletePath}>Delete</button>
         </MenuWrapper>
       </S.Header>
-      <S.ContentWrapper>
-        {!isLoading ? <PathDetail path={path} /> : 'Loading'}
-      </S.ContentWrapper>
+      {!isLoading ? <PathDetail path={path} /> : 'Loading'}
+      <S.CloseButton onClick={hide}>Close</S.CloseButton>
     </Dialog>
   );
 };
@@ -53,9 +52,6 @@ const MenuWrapper: React.FC = ({ children }) => {
 };
 
 const S = {
-  ContentWrapper: styled.div`
-    flex-grow: 1;
-  `,
   Header: styled(Dialog.Header)`
     display: flex;
     justify-content: space-between;
@@ -108,5 +104,8 @@ const S = {
         transform: scale(1);
       }
     }
+  `,
+  CloseButton: styled(Dialog.ActionButton)`
+    width: 100%;
   `,
 };
