@@ -1,3 +1,4 @@
+import { __DEV__ } from '../config';
 import { Position } from '../db/model';
 import MockGeolocation from './mock-geolocation';
 
@@ -9,8 +10,7 @@ export function getLatLngTuple(position: Position | null): L.LatLngTuple | null 
   return [latitude, longitude];
 }
 
-const geolocation =
-  import.meta.env.MODE === 'production' ? navigator.geolocation : MockGeolocation;
+const geolocation = __DEV__ ? MockGeolocation : navigator.geolocation;
 
 export function watchPosition(
   onSuccess: PositionCallback,

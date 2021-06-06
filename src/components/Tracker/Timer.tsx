@@ -55,7 +55,7 @@ export default Timer;
 
 const TimeWrapper = styled.code`
   color: #ffffff;
-  font-size: 4rem;
+  font-size: 3.5rem;
   background-color: #80808054;
   border-radius: 5px;
   padding: 0 5px;

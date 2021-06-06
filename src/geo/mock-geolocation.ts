@@ -1,3 +1,10 @@
+import { __DEV__ } from '../config';
+
+const initPosition = {
+  coords: { latitude: 50.101378516542226, longitude: 14.421355384713491 },
+  timestamp: 1622966535918,
+} as GeolocationPosition;
+
 class MockGeolocation {
   private static position: GeolocationPosition;
   static watchPosition = (
@@ -6,16 +13,25 @@ class MockGeolocation {
     options?: PositionOptions,
   ): number => {
     if (!MockGeolocation.position) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => (MockGeolocation.position = position),
-      );
+      MockGeolocation.initPosition();
     }
     const timeout = options?.timeout || 1000;
+
     return setInterval(() => onSuccess(MockGeolocation.generatePosition()), timeout);
   };
 
   static clearWatch = (id: number): void => {
     clearInterval(id);
+  };
+
+  static initPosition = (): void => {
+    if (__DEV__) {
+      MockGeolocation.position = initPosition;
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (position) => (MockGeolocation.position = position),
+      );
+    }
   };
 
   private static generatePosition = (): GeolocationPosition => {
@@ -29,6 +45,7 @@ class MockGeolocation {
       coords: { latitude, longitude },
     } as unknown as GeolocationPosition;
     MockGeolocation.position = newPosition;
+
     return MockGeolocation.position;
   };
 }

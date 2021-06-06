@@ -95,24 +95,21 @@ function createUserMarkerIcon(isTracking: boolean): ReturnType<typeof createMark
 
 const commonStyle = css`
   color: #ffa6a69e;
-  width: min-content;
+  width: 100%;
   height: min-content;
   stroke-width: 35px;
   stroke: white;
   transition: transform 200ms;
-  transform-origin: right top;
 `;
 
 const ActiveIcon = styled(FaLocationArrow)`
   font-size: 3rem;
-  margin-top: 40px;
-  margin-left: -100%;
   transform: rotate(${activeIconFixDirection}deg);
 `;
 
 const PassiveIcon = styled(FaCircle)`
   font-size: 2rem;
-  margin-top: 20px;
+  /* margin-top: 20px; */
 `;
 
 function getMarkerDirection(path: CurrentPath): number | null {

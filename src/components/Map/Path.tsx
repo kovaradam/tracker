@@ -85,9 +85,9 @@ const pathStyle = css`
 
 const Icon = styled(FaMapMarkerAlt)<{ color: string }>`
   color: ${({ color }): string => color};
-  width: min-content;
+  width: 100%;
   height: min-content;
   font-size: 2rem;
-  stroke-width: 35px;
+  /* stroke-width: 35px; */
   stroke: white;
 `;
