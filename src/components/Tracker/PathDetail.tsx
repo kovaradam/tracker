@@ -24,14 +24,14 @@ type Props = { path: Path; updatePath?: (path: NonNullable<CurrentPath>) => void
 const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
   const [, { currentPath }] = useTracker();
   const [, forceUpdate] = useReducer((p) => !p, false);
-  const persistedColor = useRef(path.color);
+  const persisted = useRef({ color: path.color, didUpdate: false });
 
   const isNewPath = currentPath !== null;
 
   useEffect(
     () => () => {
       // update color on unmount
-      if (isNewPath) {
+      if (isNewPath || !persisted.current.didUpdate) {
         return;
       }
       read(StoreName.PATHS, { key: path.id }).then((result) => {
@@ -40,7 +40,7 @@ const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
         }
         update(StoreName.PATHS, {
           key: path.id,
-          value: { color: persistedColor.current },
+          value: { color: persisted.current.color },
         });
       });
     },
@@ -50,13 +50,13 @@ const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
   const setCurrentColor = useCallback(
     (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, color: string) => {
       event.preventDefault();
-      persistedColor.current = color;
+      persisted.current = { color, didUpdate: true };
       forceUpdate();
       if (isNewPath) {
         updatePath?.({ ...path, color });
       }
     },
-    [persistedColor, forceUpdate, updatePath, path, isNewPath],
+    [persisted, forceUpdate, updatePath, path, isNewPath],
   );
 
   const duration = useMemo(() => {
@@ -142,7 +142,7 @@ const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
               onClick={(event) => setCurrentColor(event, color)}
               fill={color}
               key={color}
-              active={color === persistedColor.current}
+              active={color === persisted.current.color}
             />
           ))}
         </S.ColorPicker>

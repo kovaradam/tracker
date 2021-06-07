@@ -15,7 +15,7 @@ function useAnimatedValueLoading<T extends HTMLElement = HTMLElement>(options: {
 
   const element = useRef<T | null>(null);
   useEffect(() => {
-    function iterateWithTimeout(iteration: number): void {
+    (function iterateWithTimeout(iteration: number): void {
       setTimeout(() => {
         if (!element.current) {
           return;
@@ -28,8 +28,8 @@ function useAnimatedValueLoading<T extends HTMLElement = HTMLElement>(options: {
           element.current.innerHTML = formatter(target);
         }
       }, timeout);
-    }
-    iterateWithTimeout(start);
+    })(start);
+    // iterateWithTimeout(start);
   }, [element, target, timeout, rate, formatter, start]);
   return element;
 }
