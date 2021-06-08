@@ -30,7 +30,7 @@ function useLocationWatcher(): UseLocationReturntype {
     (listener: Listener, options?: PositionOptions): Unsubscribe => {
       state.unsubscribeCurrent?.();
       const unsubscribeWatcher = watchPosition(listener, onError, options);
-      function unsubscribe() {
+      function unsubscribe(): void {
         unsubscribeWatcher?.();
         setState((prev) => ({ ...prev, unsubscribeCurrent: undefined }));
       }

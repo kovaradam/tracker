@@ -29,7 +29,7 @@ const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
   const isNewPath = currentPath !== null;
 
   useEffect(
-    () => () => {
+    () => (): void => {
       // update color on unmount
       if (isNewPath || !persisted.current.didUpdate) {
         return;
@@ -122,7 +122,7 @@ const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
       }
     }
     element?.addEventListener('scroll', listener);
-    return () => element?.removeEventListener('scroll', listener);
+    return (): void => element?.removeEventListener('scroll', listener);
   }, [wrapperElement]);
 
   return (
@@ -139,7 +139,7 @@ const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
         <S.ColorPicker>
           {pathColors.map((color) => (
             <S.ColorOptionButton
-              onClick={(event) => setCurrentColor(event, color)}
+              onClick={(event): void => setCurrentColor(event, color)}
               fill={color}
               key={color}
               active={color === persisted.current.color}
@@ -195,7 +195,7 @@ const S = {
     display: flex;
   `,
   ColorOptionButton: styled.button<{ fill: string; active: boolean }>`
-    background-color: ${({ fill }) => fill};
+    background-color: ${({ fill }): string => fill};
     --size: 1.2rem;
     width: var(--size);
     height: var(--size);

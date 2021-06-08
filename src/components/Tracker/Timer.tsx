@@ -38,7 +38,7 @@ const Timer: React.FC<Props> = ({ className, isActive }) => {
       timerDelayInMs,
       createTimeIterator(),
     );
-    return () => {
+    return (): void => {
       clearInterval(intervald);
       setElementContent(defaultValue);
     };
@@ -61,7 +61,7 @@ const TimeWrapper = styled.code`
   padding: 0 5px;
 `;
 
-function* createTimeIterator(initValue = 1) {
+function* createTimeIterator(initValue = 1): Generator<number> {
   let i = initValue;
   while (true) {
     yield i++;

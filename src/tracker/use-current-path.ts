@@ -54,7 +54,7 @@ function getPathUpdater(
   return updater;
 }
 
-function* createPathDataIterator(initValue = 0) {
+function* createPathDataIterator(initValue = 0): Generator<[number, string]> {
   let i = initValue;
   while (true) {
     yield [i, pathColors[i++ % pathColors.length]];

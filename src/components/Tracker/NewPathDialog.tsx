@@ -29,6 +29,8 @@ const NewPathDialog: React.FC<Props> = ({ hide }) => {
         coords: {
           latitude: coords.latitude,
           longitude: coords.longitude,
+          heading: coords.heading,
+          altitude: coords.altitude,
         },
         timestamp,
       })) || [];
@@ -123,7 +125,7 @@ const S = {
     justify-content: space-around;
   `,
   Button: styled(Dialog.ActionButton)<{ color?: string }>`
-    color: ${({ color }) => color || 'auto'};
+    color: ${({ color }): string => color || 'auto'};
     width: 50%;
     &:first-child {
       border-right-width: 1px;

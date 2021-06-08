@@ -6,9 +6,7 @@ import { styled } from '@linaria/react';
 import * as L from 'leaflet';
 import { FaCircle, FaLocationArrow } from 'react-icons/fa';
 
-import { getLatLngTuple } from '../../geo/utils';
 import useMap from '../../map/use-map';
-import { CurrentPath } from '../../tracker/use-current-path';
 import { useTracker } from '../../tracker/use-tracker';
 
 type Props = { isActive: boolean };
@@ -52,7 +50,7 @@ const UserMarker: React.FC<Props> = ({ isActive }) => {
     if (!marker.current) {
       createMarker();
     }
-    direction.current = getMarkerDirection(currentPath) || direction.current;
+    direction.current = position.coords.heading ?? 0;
     const { latitude, longitude } = position.coords;
     marker.current?.setLatLng([latitude, longitude]);
     const iconElement = document.getElementById(iconId);
@@ -111,36 +109,3 @@ const PassiveIcon = styled(FaCircle)`
   font-size: 2rem;
   /* margin-top: 20px; */
 `;
-
-function getMarkerDirection(path: CurrentPath): number | null {
-  const errorValue = null;
-  const pathPositionsLength = path?.positions.length || 0;
-  if (!path || pathPositionsLength < 2) {
-    return errorValue;
-  }
-  const lastTwoPositions = [
-    path.positions[pathPositionsLength - 2],
-    path.positions[pathPositionsLength - 1],
-  ];
-
-  const positionTuples = lastTwoPositions
-    .map(getLatLngTuple)
-    .filter((tuple) => tuple !== null);
-
-  const dx = positionTuples[0]![0] - positionTuples[1]![0];
-  const dy = positionTuples[0]![1] - positionTuples[1]![1];
-  if (dx === 0) {
-    return errorValue;
-  }
-  const degrees = (Math.atan(Math.abs(dy / dx)) * 180) / Math.PI + 180;
-
-  if (dx < 0 && dy >= 0) {
-    return 180 - degrees;
-  } else if (dx < 0 && dy < 0) {
-    return degrees + 180;
-  } else if (dx >= 0 && dy < 0) {
-    return -degrees;
-  } else {
-    return degrees;
-  }
-}

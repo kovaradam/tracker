@@ -1,5 +1,5 @@
 export type Position = {
-  coords: Pick<GeolocationCoordinates, 'latitude' | 'longitude'>;
+  coords: Pick<GeolocationCoordinates, 'latitude' | 'longitude' | 'altitude' | 'heading'>;
   timestamp: number;
 };
 
