@@ -53,12 +53,13 @@ const Timer: React.FC<Props> = ({ className, isActive }) => {
 
 export default Timer;
 
-const TimeWrapper = styled.code`
+const TimeWrapper = styled.time`
   color: #ffffff;
   font-size: 3.5rem;
   background-color: #80808054;
   border-radius: 5px;
   padding: 0 5px;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 `;
 
 function* createTimeIterator(initValue = 1): Generator<number> {

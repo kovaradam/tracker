@@ -15,7 +15,8 @@ import { Path } from '../../db/model';
 import { pathColors } from '../../style';
 import { CurrentPath } from '../../tracker/use-current-path';
 import { useTracker } from '../../tracker/use-tracker';
-import { getPositionDistance } from '../../utils/position-distance';
+import formatDistance from '../../utils/format-distance';
+import { getPathDistance } from '../../utils/position-distance';
 import useAnimatedValueLoading from '../../utils/use-animated-value';
 import Dialog from '../Dialog';
 
@@ -80,15 +81,7 @@ const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
       return fallbackValue;
     }
     const positions = path.positions.filter((position) => position !== null);
-    if (!positions || positions.length < 2) {
-      return fallbackValue;
-    }
-    let sum = 0;
-    positions.reduce((prev, current) => {
-      sum += getPositionDistance(prev, current);
-      return current;
-    });
-    return sum;
+    return getPathDistance(positions);
   }, [path]);
 
   const distanceTarget = Math.round(pathDistance);
@@ -155,15 +148,6 @@ export default PathDetail;
 
 function getDate(): string {
   return new Date().toLocaleDateString();
-}
-
-function formatDistance(inputInMeters: number): string {
-  const meters = Math.round(inputInMeters);
-  if (meters < 1000) {
-    return `${meters} meter${meters === 1 ? '' : 's'}`;
-  }
-  const km = Math.round(meters / 1000);
-  return `${km}.${meters % 1000} km`;
 }
 
 function formatDuration(timeInSeconds: number): string {

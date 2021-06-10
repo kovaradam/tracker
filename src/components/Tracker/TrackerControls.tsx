@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 
 import { styled } from '@linaria/react';
 import { atom, useAtom } from 'jotai';
@@ -8,6 +8,8 @@ import { MdCenterFocusWeak } from 'react-icons/md';
 
 import useMap from '../../map/use-map';
 import { useTracker } from '../../tracker/use-tracker';
+import formatDistance from '../../utils/format-distance';
+import { getPathDistance } from '../../utils/position-distance';
 import { TrackerWrapperComponent } from './';
 import Message from './Message';
 import NewPathDialog from './NewPathDialog';
@@ -17,7 +19,7 @@ import Timer from './Timer';
 export const selectedPathIdAtom = atom<null | number>(null);
 
 const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
-  const [, { end, start, isTracking }] = useTracker();
+  const [, { end, start, isTracking, currentPath }] = useTracker();
   const [, { centerMapView }] = useMap();
   const [isPathDialogVisible, toggleIsPathDialogVisible] = useReducer((p) => !p, false);
   const [selectedPathId, setSelectedPathId] = useAtom(selectedPathIdAtom);
@@ -31,6 +33,13 @@ const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
     }
   }, [isTracking, start, end]);
 
+  const pathDistance = useMemo((): string => {
+    if (!currentPath) {
+      return formatDistance(0);
+    }
+    return formatDistance(getPathDistance(currentPath.positions));
+  }, [currentPath]);
+
   return (
     <S.Wrapper isVisible={isVisible}>
       <S.TopPanelWrapper>
@@ -38,6 +47,7 @@ const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
           {isTracking ? 'Stop' : 'Start'}
         </S.StateButton>
         <Message />
+        <S.DistanceWrapper isHidden={!isTracking}>{pathDistance}</S.DistanceWrapper>
       </S.TopPanelWrapper>
       <S.LeftPanelWrapper isVisible={!isTracking}>
         <S.UtilsButton onClick={centerMapView}>
@@ -52,7 +62,12 @@ const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
       </S.BottomPanelWrapper>
       {isPathDialogVisible && <NewPathDialog hide={toggleIsPathDialogVisible} />}
       {selectedPathId !== null && (
-        <PathDetailDialog id={selectedPathId} hide={() => setSelectedPathId(null)} />
+        <PathDetailDialog
+          id={selectedPathId}
+          hide={(): void => {
+            setSelectedPathId(null);
+          }}
+        />
       )}
     </S.Wrapper>
   );
@@ -111,6 +126,7 @@ const S = {
     color: white;
     padding: 0.5rem;
     font-size: 1.5rem;
+    z-index: 1;
   `,
   UtilsButton: styled.button`
     font-size: 1.5rem;
@@ -124,4 +140,16 @@ const S = {
   CloseIcon: styled(FiX)``,
   CenterIcon: styled(MdCenterFocusWeak)``,
   SettingsIcon: styled(GoThreeBars)``,
+  DistanceWrapper: styled.code<{ isHidden: boolean }>`
+    position: absolute;
+    bottom: 0;
+    transition: all 200ms;
+    margin-right: ${({ isHidden }): number => (isHidden ? -100 : 0)}px;
+    margin-bottom: -25px;
+    visibility: ${({ isHidden }): string => (isHidden ? 'hidden' : 'visible')};
+    background-color: #80808054;
+    border-radius: 5px;
+    padding: 5px;
+    color: white;
+  `,
 };

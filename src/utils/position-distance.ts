@@ -14,10 +14,24 @@ export function getPositionTupleDistance(
   const lengthInDeg = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
   return withDegToMeters(lengthInDeg);
 }
-export function getPositionDistance(a: Position, b: Position): number {
+
+function getPositionDistance(a: Position, b: Position): number {
   function getPositionTuple(position: Position): [number, number] {
     const { latitude, longitude } = position.coords;
     return [latitude, longitude];
   }
   return getPositionTupleDistance(getPositionTuple(a), getPositionTuple(b));
+}
+
+export function getPathDistance(positions: Position[]): number {
+  const fallbackValue = 0;
+  if (positions.length < 2) {
+    return fallbackValue;
+  }
+  let sum = 0;
+  positions.reduce((prev, current) => {
+    sum += getPositionDistance(prev, current);
+    return current;
+  });
+  return sum;
 }
