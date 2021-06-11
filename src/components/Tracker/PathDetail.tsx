@@ -19,6 +19,7 @@ import formatDistance from '../../utils/format-distance';
 import { getPathDistance } from '../../utils/position-distance';
 import useAnimatedValueLoading from '../../utils/use-animated-value';
 import Dialog from '../Dialog';
+import HeightProfile from './HeightProfile';
 
 type Props = { path: Path; updatePath?: (path: NonNullable<CurrentPath>) => void };
 
@@ -140,6 +141,7 @@ const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
           ))}
         </S.ColorPicker>
       </Dialog.FormValue>
+      <HeightProfile />
     </S.Wrapper>
   );
 };

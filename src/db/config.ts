@@ -7,15 +7,30 @@ const defaultPaths: Path[] = [
     id: 0,
     positions: [
       {
-        coords: { latitude: 50.103017631955716, longitude: 14.422289852142328 },
+        coords: {
+          latitude: 50.103017631955716,
+          longitude: 14.422289852142328,
+          altitude: 200,
+          heading: 0,
+        },
         timestamp: 1621773352155,
       },
       {
-        coords: { latitude: 50.10202858292974, longitude: 14.433631896972658 },
+        coords: {
+          latitude: 50.10202858292974,
+          longitude: 14.433631896972658,
+          altitude: 250,
+          heading: 0,
+        },
         timestamp: 1621773352155,
       },
       {
-        coords: { latitude: 50.1005421090992, longitude: 14.421529769897463 },
+        coords: {
+          latitude: 50.1005421090992,
+          longitude: 14.421529769897463,
+          altitude: 230,
+          heading: 0,
+        },
         timestamp: 1621773352155,
       },
     ],
@@ -25,11 +40,21 @@ const defaultPaths: Path[] = [
     id: 1,
     positions: [
       {
-        coords: { latitude: 50.108249250710514, longitude: 14.443244934082033 },
+        coords: {
+          latitude: 50.108249250710514,
+          longitude: 14.443244934082033,
+          altitude: 200,
+          heading: 0,
+        },
         timestamp: 1621773352155,
       },
       {
-        coords: { latitude: 50.098560072241156, longitude: 14.443244934082033 },
+        coords: {
+          latitude: 50.098560072241156,
+          longitude: 14.443244934082033,
+          altitude: 200,
+          heading: 0,
+        },
         timestamp: 1621773352155,
       },
     ],
@@ -43,7 +68,7 @@ export enum StoreName {
 
 const config: Config = {
   name: 'tracker-db',
-  version: 2,
+  version: 3,
   objectStores: [
     {
       name: StoreName.PATHS,
