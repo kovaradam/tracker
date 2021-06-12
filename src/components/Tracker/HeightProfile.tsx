@@ -1,20 +1,38 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import { styled } from '@linaria/react';
-import { useRead } from 'indexeddb-hooked';
 
-import { StoreName } from '../../db/config';
 import { Path, Position } from '../../db/model';
+import { pathColors } from '../../style';
 import { getPathDistance } from '../../utils/position-distance';
 
-const canvas = { width: 100, height: 100 };
+const canvas = { width: 300, height: 200 };
 
-const HeightProfile: React.FC = () => {
+type Props = { path: Path };
+
+const HeightProfile: React.FC<Props> = ({ path }) => {
   const canvasElement = useRef<HTMLCanvasElement | null>(null);
-  const [paths] = useRead<Path>(StoreName.PATHS);
-  if (paths) {
-    console.log(getLineNodes(paths[0].positions));
-  }
+
+  const drawPath = useCallback(
+    (context: CanvasRenderingContext2D) => {
+      const nodes = getLineNodes(path.positions);
+      const { height, width } = canvas;
+      context.lineWidth = 5;
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
+      const gradient = context.createLinearGradient(0, 0, width, 0);
+      gradient.addColorStop(0, pathColors[0]);
+      gradient.addColorStop(0.5, pathColors[3]);
+      gradient.addColorStop(1, pathColors[0]);
+      context.strokeStyle = gradient;
+      context.beginPath();
+      nodes.forEach(([x, y]) => {
+        context.lineTo(x + 0.5, height - y + 0.5);
+      });
+      context.stroke();
+    },
+    [path],
+  );
 
   useEffect(() => {
     if (!canvasElement.current) {
@@ -24,15 +42,8 @@ const HeightProfile: React.FC = () => {
     if (!context) {
       return;
     }
-    const { width, height } = canvas;
-
-    context.moveTo(0, 0);
-    context.lineTo(width / 3, height / 3);
-    context.lineTo(width / 2, height / 1.2);
-    context.lineTo(width / 1.2, height);
-    context.lineTo(width, height / 3);
-    context.stroke();
-  }, [canvasElement]);
+    drawPath(context);
+  }, [canvasElement, drawPath]);
 
   return <S.Canvas {...canvas} ref={canvasElement} />;
 };
@@ -42,8 +53,8 @@ export default HeightProfile;
 const S = {
   Canvas: styled.canvas`
     width: 100%;
-    height: 50px;
-    border: 1px dashed #a52a2a75;
+    height: 85px;
+    box-shadow: 0 0 2px 2px #80808026;
     border-radius: 5px;
   `,
 };

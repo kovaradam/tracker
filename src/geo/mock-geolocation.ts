@@ -2,7 +2,12 @@ import { Position } from '../db/model';
 import { getLatLngTuple } from './utils';
 
 const initPosition = {
-  coords: { latitude: 50.101378516542226, longitude: 14.421355384713491, heading: 0 },
+  coords: {
+    latitude: 50.101378516542226,
+    longitude: 14.421355384713491,
+    heading: 0,
+    altitude: 200,
+  },
   timestamp: 1622966535918,
 } as Position;
 
@@ -52,10 +57,11 @@ class MockGeolocation {
     const generateNextDirection = (): number => withRandomSign(Math.random() / 1000);
     const latitude = coords.latitude + generateNextDirection();
     const longitude = coords.longitude + generateNextDirection();
+    const altitude = (coords.altitude ?? 0) + generateNextDirection();
 
     const newPosition = {
       timestamp,
-      coords: { latitude, longitude, heading: 0 },
+      coords: { latitude, longitude, heading: 0, altitude },
     };
 
     const heading =

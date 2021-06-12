@@ -141,7 +141,7 @@ const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
           ))}
         </S.ColorPicker>
       </Dialog.FormValue>
-      <HeightProfile />
+      <HeightProfile path={path} />
     </S.Wrapper>
   );
 };
