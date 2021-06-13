@@ -1,25 +1,18 @@
-import React, { useCallback, useEffect, useReducer, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
-import { styled } from '@linaria/react';
+import { css } from '@linaria/core';
 
 import { Path, Position } from '../../db/model';
 import { pathColors } from '../../style';
 import formatDistance from '../../utils/format-distance';
 import { getPathDistance } from '../../utils/position-distance';
+import Canvas from '../Canvas';
 
 const canvas = { width: 1000, height: 300 };
 
 type Props = { path: Path };
 
-function zoomReducer(prev: number, newValue: number): number {
-  const newState = prev + newValue;
-  return newState >= 1 ? newState : 1;
-}
-
 const HeightProfile: React.FC<Props> = ({ path }) => {
-  const [zoom, updateZoom] = useReducer(zoomReducer, 1);
-  const canvasElement = useRef<HTMLCanvasElement | null>(null);
-
   const padY = useCallback((value: number) => {
     return padHeight(value, 0.9, canvas.height);
   }, []);
@@ -85,9 +78,10 @@ const HeightProfile: React.FC<Props> = ({ path }) => {
       });
 
       const extremes = getPathExtremes(path.positions);
+      const showIndices = [0, positionMap.length - 1];
       context.lineWidth = 2;
       positionMap.forEach(({ altitude, node: [x, y] }, index) => {
-        if (index !== positionMap.length - 1 && !extremes.includes(altitude || -1)) {
+        if (!showIndices.includes(index) && !extremes.includes(altitude || -1)) {
           return;
         }
         context.beginPath();
@@ -104,42 +98,17 @@ const HeightProfile: React.FC<Props> = ({ path }) => {
     [path, padY, padX],
   );
 
-  useEffect(() => {
-    if (!canvasElement.current) {
-      return;
-    }
-    const context = canvasElement.current.getContext('2d');
-    if (!context) {
-      return;
-    }
-    const { width, height } = canvas;
-    context.clearRect(0, 0, width, height);
-    context.scale(zoom, zoom);
-    drawLabels(context);
-    drawPath(context);
-  }, [canvasElement, drawPath, drawLabels, zoom]);
-
-  const handleWheel = useCallback(
-    ({ deltaY }: React.WheelEvent<HTMLCanvasElement>) => {
-      updateZoom(deltaY / 1000);
-    },
-    [updateZoom],
-  );
-
-  return <S.Canvas {...canvas} ref={canvasElement} onWheel={handleWheel} />;
+  return <Canvas {...canvas} className={style} draw={[drawLabels, drawPath]} />;
 };
 
 export default HeightProfile;
 
-const S = {
-  Canvas: styled.canvas`
-    width: 100%;
-    height: 85px;
-    box-shadow: 0 0 1px 0px #a52a2a75;
-    border-radius: 2px;
-  `,
-};
-
+const style = css`
+  width: 100%;
+  height: 85px;
+  box-shadow: 0 0 1px 0px #a52a2a75;
+  border-radius: 2px;
+`;
 function padHeight(value: number, rate: number, height: number): number {
   const bottomPad = (1 - rate) * height;
   const percentage = (100 * value) / height;

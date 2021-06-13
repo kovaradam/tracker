@@ -62,6 +62,7 @@ const S = {
     margin: 0px;
     padding: 0;
     border-radius: 5px;
+    color: inherit;
   `,
   MenuWrapper: styled.div`
     display: flex;
