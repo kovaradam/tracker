@@ -57,7 +57,7 @@ class MockGeolocation {
     const generateNextDirection = (): number => withRandomSign(Math.random() / 1000);
     const latitude = coords.latitude + generateNextDirection();
     const longitude = coords.longitude + generateNextDirection();
-    const altitude = (coords.altitude ?? 0) + generateNextDirection();
+    const altitude = (coords.altitude ?? 0) + generateNextDirection() * 1000;
 
     const newPosition = {
       timestamp,

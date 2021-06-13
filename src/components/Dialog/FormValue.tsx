@@ -46,7 +46,7 @@ function getElementPositionInSiblings(element: HTMLElement): number {
 
 const S = {
   Wrapper: styled.div`
-    height: 3.5rem;
+    min-height: 3.5rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;

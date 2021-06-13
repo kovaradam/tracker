@@ -1,37 +1,107 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useReducer, useRef } from 'react';
 
 import { styled } from '@linaria/react';
 
 import { Path, Position } from '../../db/model';
 import { pathColors } from '../../style';
+import formatDistance from '../../utils/format-distance';
 import { getPathDistance } from '../../utils/position-distance';
 
-const canvas = { width: 300, height: 200 };
+const canvas = { width: 1000, height: 300 };
 
 type Props = { path: Path };
 
+function zoomReducer(prev: number, newValue: number): number {
+  const newState = prev + newValue;
+  return newState >= 1 ? newState : 1;
+}
+
 const HeightProfile: React.FC<Props> = ({ path }) => {
+  const [zoom, updateZoom] = useReducer(zoomReducer, 1);
   const canvasElement = useRef<HTMLCanvasElement | null>(null);
+
+  const padY = useCallback((value: number) => {
+    return padHeight(value, 0.9, canvas.height);
+  }, []);
+
+  const padX = useCallback((value: number) => {
+    return padHeight(value, 0.95, canvas.width);
+  }, []);
 
   const drawPath = useCallback(
     (context: CanvasRenderingContext2D) => {
       const nodes = getLineNodes(path.positions);
       const { height, width } = canvas;
-      context.lineWidth = 5;
+
+      context.lineWidth = 5.5;
       context.lineCap = 'round';
       context.lineJoin = 'round';
       const gradient = context.createLinearGradient(0, 0, width, 0);
-      gradient.addColorStop(0, pathColors[0]);
-      gradient.addColorStop(0.5, pathColors[3]);
-      gradient.addColorStop(1, pathColors[0]);
+      gradient.addColorStop(0, pathColors[2]);
+      gradient.addColorStop(0.5, pathColors[0]);
+      gradient.addColorStop(1, pathColors[2]);
       context.strokeStyle = gradient;
       context.beginPath();
+      context.setLineDash([]);
       nodes.forEach(([x, y]) => {
-        context.lineTo(x + 0.5, height - y + 0.5);
+        context.lineTo(padX(x) + 0.5, padY(height - y) + 0.5);
       });
       context.stroke();
     },
-    [path],
+    [path, padY, padX],
+  );
+
+  const drawLabels = useCallback(
+    (context: CanvasRenderingContext2D) => {
+      const nodes = getLineNodes(path.positions);
+      const positionMap = augmentPositions(path.positions).map(
+        ({ coords: { altitude }, distance }, index) => ({
+          altitude,
+          node: nodes[index],
+          distance,
+        }),
+      );
+
+      context.lineWidth = 3.5;
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
+      context.strokeStyle = '#80808050';
+      context.lineDashOffset = 50;
+      context.font = '15px Arial';
+      context.fillStyle = pathColors[2];
+      const { height } = canvas;
+
+      positionMap.forEach(({ distance, node }, index) => {
+        if (index === 0) {
+          return;
+        }
+        const [x, y] = node;
+        context.beginPath();
+        context.setLineDash([5, 4]);
+        context.moveTo(padX(x) + 0.5, height + 0.5);
+        context.lineTo(padX(x) + 0.5, padY(height - y) + 0.5);
+        context.stroke();
+        context.fillText(formatDistance(distance, true), padX(x) + 4.5, height - 2);
+      });
+
+      const extremes = getPathExtremes(path.positions);
+      context.lineWidth = 2;
+      positionMap.forEach(({ altitude, node: [x, y] }, index) => {
+        if (index !== positionMap.length - 1 && !extremes.includes(altitude || -1)) {
+          return;
+        }
+        context.beginPath();
+        context.moveTo(0.5, padY(height - y) + 0.5);
+        context.lineTo(padX(x) + 0.5, padY(height - y) + 0.5);
+        context.stroke();
+        context.fillText(
+          formatDistance(altitude ?? 0, true),
+          5.5,
+          padY(height - y) - 4.5,
+        );
+      });
+    },
+    [path, padY, padX],
   );
 
   useEffect(() => {
@@ -42,10 +112,21 @@ const HeightProfile: React.FC<Props> = ({ path }) => {
     if (!context) {
       return;
     }
+    const { width, height } = canvas;
+    context.clearRect(0, 0, width, height);
+    context.scale(zoom, zoom);
+    drawLabels(context);
     drawPath(context);
-  }, [canvasElement, drawPath]);
+  }, [canvasElement, drawPath, drawLabels, zoom]);
 
-  return <S.Canvas {...canvas} ref={canvasElement} />;
+  const handleWheel = useCallback(
+    ({ deltaY }: React.WheelEvent<HTMLCanvasElement>) => {
+      updateZoom(deltaY / 1000);
+    },
+    [updateZoom],
+  );
+
+  return <S.Canvas {...canvas} ref={canvasElement} onWheel={handleWheel} />;
 };
 
 export default HeightProfile;
@@ -54,10 +135,17 @@ const S = {
   Canvas: styled.canvas`
     width: 100%;
     height: 85px;
-    box-shadow: 0 0 2px 2px #80808026;
-    border-radius: 5px;
+    box-shadow: 0 0 1px 0px #a52a2a75;
+    border-radius: 2px;
   `,
 };
+
+function padHeight(value: number, rate: number, height: number): number {
+  const bottomPad = (1 - rate) * height;
+  const percentage = (100 * value) / height;
+  const outputHeight = height - height * (1 - rate) * 2;
+  return bottomPad + (outputHeight / 100) * percentage;
+}
 
 function getLineNodes(positions: Position[]): [number, number][] {
   const augmentedPositions = augmentPositions(positions);
@@ -70,7 +158,9 @@ function getLineNodes(positions: Position[]): [number, number][] {
 
 type PositionWithDistance = Position & { distance: number };
 
-function getPathExtremes(positions: Position[]): [number, number, number] {
+function getPathExtremes(
+  positions: Position[],
+): [minHeight: number, maxHeight: number, distance: number] {
   let [min, max] = [Number.MAX_SAFE_INTEGER, Number.MIN_VALUE];
   positions.forEach(({ coords: { altitude } }) => {
     if (!altitude) {

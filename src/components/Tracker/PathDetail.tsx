@@ -36,7 +36,9 @@ const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
       if (isNewPath || !persisted.current.didUpdate) {
         return;
       }
+
       read(StoreName.PATHS, { key: path.id }).then((result) => {
+        debugger;
         if (!result) {
           return;
         }

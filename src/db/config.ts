@@ -68,7 +68,7 @@ export enum StoreName {
 
 const config: Config = {
   name: 'tracker-db',
-  version: 3,
+  version: 4,
   objectStores: [
     {
       name: StoreName.PATHS,

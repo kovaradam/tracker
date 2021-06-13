@@ -144,7 +144,7 @@ const S = {
     position: absolute;
     bottom: 0;
     transition: all 200ms;
-    margin-right: ${({ isHidden }): number => (isHidden ? -100 : 0)}px;
+    transform: translateX(${({ isHidden }): number => (isHidden ? 120 : 0)}%);
     margin-bottom: -25px;
     visibility: ${({ isHidden }): string => (isHidden ? 'hidden' : 'visible')};
     background-color: #80808054;
