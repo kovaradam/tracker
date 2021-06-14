@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useReducer, useRef } from 'react';
 
 import useForwardedRef from '../../utils/use-forwarded-ref';
-import { getCursorPosition } from './utils';
+import { getCanvasCursorPosition } from './utils';
 
 type Props = {
   className: string;
@@ -28,6 +28,7 @@ function zoomReducer(prev: ZoomState, newValue: ZoomState): ZoomState {
 type PanState = [startX?: number, startY?: number, endX?: number, endY?: number];
 
 const defaultPan = [undefined, undefined, undefined, undefined] as PanState;
+
 const getDiff = (state: PanState): [dx: number, dy: number] => {
   const [startX, startY, endX, endY] = state;
   const dx = Number(endX) - Number(startX);
@@ -38,20 +39,21 @@ const getDiff = (state: PanState): [dx: number, dy: number] => {
 const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
   const [zoomState, updateZoom] = useReducer(zoomReducer, [1, 0, 0]);
   const [didUpdate, forceUpdate] = useReducer((p) => !p, false);
-  const panState = useRef(defaultPan);
+  const panState = useRef({ coords: defaultPan, isActive: false });
   const canvasElement = useForwardedRef<CanvasRef>(forwardedRef);
 
   const updatePan = useCallback(
     (newValue: PanState | null): void => {
-      const prev = panState.current;
+      const prev = panState.current.coords;
       const [zoom] = zoomState;
       if (newValue === null || zoom === 1) {
-        panState.current = defaultPan;
+        panState.current.coords = defaultPan;
         return;
       }
-      panState.current = prev.map((prevValue, index) => {
+      panState.current.coords = prev.map((prevValue, index) => {
         return newValue[index] ?? prevValue;
       }) as PanState;
+
       forceUpdate();
     },
     [forceUpdate, panState, zoomState],
@@ -59,11 +61,11 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
 
   const handleWheel = useCallback(
     (event: React.WheelEvent<HTMLCanvasElement>) => {
-      const [x, y] = getCursorPosition(event);
+      const [x, y] = getCanvasCursorPosition(event, props);
       const zoom = -event.deltaY / 1000;
       updateZoom([zoom, x, y]);
     },
-    [updateZoom],
+    [updateZoom, props],
   );
 
   useEffect(() => {
@@ -90,14 +92,16 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
     }
     const { width, height, draw } = props;
     const [zoom, ptx, pty] = zoomState;
+
     context.clearRect(0, 0, width, height);
+    context.setTransform(1, 0, 0, 1, 0, 0);
     context.translate(ptx, pty);
-    context.setTransform(zoom, 0, 0, zoom, 0, 0);
+    context.scale(zoom, zoom);
     context.translate(-ptx, -pty);
     if (zoom === 1) {
       updatePan(null);
     }
-    const [panX, panY] = getDiff(panState.current);
+    const [panX, panY] = getDiff(panState.current.coords);
     context.translate(panX, panY);
     draw.forEach((draw) => draw(context));
   }, [canvasElement, zoomState, props, panState, didUpdate, updatePan]);
@@ -108,6 +112,7 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
     }
     const currentElement = canvasElement.current;
     function onTouchStart(event: TouchEvent): void {
+      panState.current.isActive = true;
       event.preventDefault();
       const { changedTouches } = event;
       if (changedTouches.length === 1) {
@@ -125,7 +130,8 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
       }
     }
     function onTouchEnd(): void {
-      //   updatePan(null);
+      panState.current.isActive = false;
+      updatePan(null);
     }
     currentElement.ontouchstart = onTouchStart;
     currentElement.ontouchmove = onTouchMove;
