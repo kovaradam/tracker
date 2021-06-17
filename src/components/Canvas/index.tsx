@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useReducer, useRef } from 'react';
 
+import { styled } from '@linaria/react';
+
 import useForwardedRef from '../../utils/use-forwarded-ref';
-import { getCanvasCursorPosition } from './utils';
+import { getCanvasCursorPosition, getPinchCenter, getPinchRadius } from './utils';
 
 type Props = {
   className: string;
@@ -39,8 +41,8 @@ const getTouchDiff = (state: PanState): [dx: number, dy: number] => {
 const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
   const [zoomState, updateZoom] = useReducer(zoomReducer, [1, 0, 0]);
   const [didUpdate, forceUpdate] = useReducer((p) => !p, false);
-  const panState = useRef({ coords: defaultPan, isActive: false });
-  const prevDiff = useRef([0, 0]);
+  const panState = useRef({ coords: defaultPan, isActive: false, prevDiff: [0, 0] });
+  const pinchState = useRef({ radius: 0 });
   const canvasElement = useForwardedRef<CanvasRef>(forwardedRef);
 
   const getCurrentPanBound = useCallback((): [number, number] => {
@@ -52,7 +54,7 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
 
   const getCurrentPan = useCallback((newCoords: PanState): [number, number] => {
     const [panX, panY] = getTouchDiff(newCoords);
-    const [prevPanX, prevPanY] = prevDiff.current;
+    const [prevPanX, prevPanY] = panState.current.prevDiff;
     return [panX + prevPanX, panY + prevPanY];
   }, []);
 
@@ -84,9 +86,25 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
 
   const handleWheel = useCallback(
     (event: React.WheelEvent<HTMLCanvasElement>) => {
-      const [x, y] = getCanvasCursorPosition(event, props);
+      const { clientX, clientY, currentTarget } = event;
+
+      const [x, y] = getCanvasCursorPosition(clientX, clientY, currentTarget, props);
       const zoom = -event.deltaY / 1000;
       updateZoom([zoom, x, y]);
+    },
+    [updateZoom, props],
+  );
+
+  const handlePinch = useCallback(
+    (event: TouchEvent) => {
+      const [x, y] = getPinchCenter(event, props);
+      const { radius: prevRadius } = pinchState.current;
+      const newRadius = getPinchRadius(event);
+      const zoomDirection = prevRadius < newRadius ? 1 : -1;
+      const zoomUpdate = +(prevRadius !== newRadius) * zoomDirection * 0.1;
+      console.log(zoomUpdate);
+      pinchState.current.radius = newRadius;
+      updateZoom([zoomUpdate, x, y]);
     },
     [updateZoom, props],
   );
@@ -106,7 +124,7 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
     return (): void => parent?.removeEventListener('wheel', listener);
   }, [canvasElement]);
 
-  // Transform and draw
+  // Apply transforms and draw
   useEffect(() => {
     if (!canvasElement.current) {
       return;
@@ -125,7 +143,7 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
     context.translate(-ptx, -pty);
     if (zoom === 1) {
       updatePan(null);
-      prevDiff.current = [0, 0];
+      panState.current.prevDiff = [0, 0];
     }
     const [panX, panY] = getCurrentPan(panState.current.coords);
 
@@ -142,25 +160,43 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
     function onTouchStart(event: TouchEvent): void {
       panState.current.isActive = true;
       event.preventDefault();
-      const { changedTouches } = event;
-      if (changedTouches.length === 1) {
-        const touch = changedTouches[0];
-        const { clientX, clientY } = touch;
-        updatePan([clientX, clientY]);
+      const { touches } = event;
+
+      switch (touches.length) {
+        case 1:
+          const touch = touches[0];
+          const { clientX, clientY } = touch;
+          updatePan([clientX, clientY]);
+          break;
+        case 2:
+          handlePinch(event);
+          break;
       }
     }
     function onTouchMove(event: TouchEvent): void {
       const { changedTouches } = event;
-      if (changedTouches.length === 1) {
-        const touch = changedTouches[0];
-        const { clientX, clientY } = touch;
-        updatePan([undefined, undefined, clientX, clientY]);
+      switch (changedTouches.length) {
+        case 1:
+          const touch = changedTouches[0];
+          const { clientX, clientY } = touch;
+          updatePan([undefined, undefined, clientX, clientY]);
+          break;
+        case 2:
+          handlePinch(event);
+          break;
       }
     }
-    function onTouchEnd(): void {
-      panState.current.isActive = false;
-      prevDiff.current = getCurrentPan(panState.current.coords);
-      updatePan(null);
+    function onTouchEnd(event: TouchEvent): void {
+      const { changedTouches } = event;
+      switch (changedTouches.length) {
+        case 1:
+          panState.current.isActive = false;
+          panState.current.prevDiff = getCurrentPan(panState.current.coords);
+          updatePan(null);
+          break;
+        case 2:
+          break;
+      }
     }
     currentElement.ontouchstart = onTouchStart;
     currentElement.ontouchmove = onTouchMove;
@@ -170,9 +206,15 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
       currentElement.ontouchmove = null;
       currentElement.ontouchend = null;
     };
-  }, [canvasElement, updatePan, getCurrentPan]);
+  }, [canvasElement, updatePan, getCurrentPan, handlePinch]);
 
-  return <canvas {...props} ref={canvasElement} onWheel={handleWheel} />;
+  return <S.Canvas {...props} ref={canvasElement} onWheel={handleWheel} />;
 });
 
 export default Canvas;
+
+const S = {
+  Canvas: styled.canvas`
+    touch-action: none;
+  `,
+};
