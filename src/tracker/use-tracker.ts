@@ -31,8 +31,9 @@ export function useTracker(): UseTrackerReturnType {
   const start = useCallback(() => {
     setState((prev) => ({ ...prev, isTracking: true }));
     subscribe((position) => {
-      updateCurrentPath(position);
-      setState((prev) => ({ ...prev, position }));
+      const newPosition = getPositionCopy(position);
+      updateCurrentPath(newPosition);
+      setState((prev) => ({ ...prev, position: newPosition }));
     });
   }, [setState, subscribe, updateCurrentPath]);
 
@@ -44,4 +45,17 @@ export function useTracker(): UseTrackerReturnType {
   }, [setState, unsubscribeCurrent]);
 
   return [state.position, { start, end, isTracking: state.isTracking, currentPath }];
+}
+
+function getPositionCopy(position: GeolocationPosition): Position {
+  const newPosition: Position = {
+    coords: {
+      heading: position.coords.heading,
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude,
+      altitude: position.coords.altitude,
+    },
+    timestamp: position.timestamp,
+  };
+  return newPosition;
 }

@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 
 import { atom, useAtom } from 'jotai';
 
-import { Path } from '../db/model';
+import { Path, Position } from '../db/model';
 import { pathColors } from '../style';
 
 export type CurrentPath = Path | null;
@@ -11,7 +11,7 @@ const currentPath = atom<CurrentPath>(null);
 
 type UseCurrentPathReturnType = [
   path: CurrentPath,
-  updatePath: (position: GeolocationPosition) => void,
+  updatePath: (position: Position) => void,
   deletePath: () => void,
 ];
 
@@ -19,7 +19,7 @@ export function useCurrentPath(): UseCurrentPathReturnType {
   const [path, setPath] = useAtom(currentPath);
 
   const updatePath = useCallback(
-    (newPosition: GeolocationPosition) => {
+    (newPosition: Position) => {
       const applyPathUpdate = getPathUpdater(newPosition);
       setPath(applyPathUpdate);
     },
@@ -33,9 +33,7 @@ export function useCurrentPath(): UseCurrentPathReturnType {
   return [path, updatePath, deletePath];
 }
 
-function getPathUpdater(
-  newPosition: GeolocationPosition,
-): (prev: CurrentPath) => CurrentPath {
+function getPathUpdater(newPosition: Position): (prev: CurrentPath) => CurrentPath {
   const updater: ReturnType<typeof getPathUpdater> = (prevPath: CurrentPath) => {
     if (prevPath === null) {
       const [id, color] = pathDataGenerator.next().value as [number, string];

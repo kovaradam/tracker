@@ -206,7 +206,5 @@ function augmentPositions(positions: Position[]): PositionWithDistance[] {
 
 function getElementDimRatio(element: HTMLElement): number {
   const { offsetWidth, offsetHeight } = element;
-  console.log(offsetWidth, offsetHeight);
-
   return offsetWidth / offsetHeight;
 }
