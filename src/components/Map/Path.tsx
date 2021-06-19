@@ -19,9 +19,12 @@ const Path: React.FC<Props> = (props) => {
   const { showMarker, color, positions, id } = props;
   const points = useMemo(() => getPointsFromPositions(positions), [positions]);
   const [map] = useMap();
-  const persisted = useRef<Partial<{ line: L.Polyline; marker: L.Marker }>>({
+  const persisted = useRef<
+    Partial<{ line: L.Polyline; marker: L.Marker; startPoint: L.Circle }>
+  >({
     line: undefined,
     marker: undefined,
+    startPoint: undefined,
   });
   const [, setSelectedPathId] = useAtom(selectedPathIdAtom);
 
@@ -33,6 +36,12 @@ const Path: React.FC<Props> = (props) => {
     persisted.current.line = L.polyline(points as L.LatLngTuple[]);
     persisted.current.line.setStyle({ color, className: pathStyle });
     persisted.current.line.addTo(map);
+
+    persisted.current.startPoint = L.circle((points as L.LatLngTuple[])[0], {
+      radius: 2,
+    });
+    persisted.current.startPoint.setStyle({ color, className: startPointStyle });
+    persisted.current.startPoint.addTo(map);
 
     if (showMarker !== false) {
       const [markerIcon, renderIconContent] = createMarkerIcon(
@@ -51,12 +60,13 @@ const Path: React.FC<Props> = (props) => {
   // on map init
   useEffect(() => {
     updateLine();
-    const { line, marker } = persisted.current;
+    const { line, marker, startPoint } = persisted.current;
     marker?.addEventListener('click', () => setSelectedPathId(id));
 
-    return () => {
+    return (): void => {
       line?.remove();
       marker?.remove();
+      startPoint?.remove();
     };
   }, [map, points, color]);
 
@@ -83,11 +93,15 @@ const pathStyle = css`
   }
 `;
 
+const startPointStyle = css`
+  stroke-width: 10px;
+  fill-opacity: 1;
+`;
+
 const Icon = styled(FaMapMarkerAlt)<{ color: string }>`
   color: ${({ color }): string => color};
   width: 100%;
   height: min-content;
   font-size: 2rem;
-  /* stroke-width: 35px; */
   stroke: white;
 `;
