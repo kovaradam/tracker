@@ -25,7 +25,7 @@ export function watchPosition(
     }
     return;
   }
-  const id = geolocation.watchPosition(onSuccess, onError, { timeout: 1000 });
+  const id = geolocation.watchPosition(onSuccess, onError, { timeout: 500 });
   clear = (): void => {
     geolocation.clearWatch(id);
   };

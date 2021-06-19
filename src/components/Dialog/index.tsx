@@ -55,8 +55,8 @@ const S = {
     } ;
   `,
   Wrapper: styled.div`
-    width: 70vw;
-    height: 70vh;
+    width: 80vw;
+    height: 75vh;
     background-color: white;
     border-radius: 5px;
     box-shadow: 0 0 6px 3px #00000030;

@@ -5,11 +5,13 @@ import { styled } from '@linaria/react';
 import useForwardedRef from '../../utils/use-forwarded-ref';
 import { getCanvasCursorPosition, getPinchCenter, getPinchRadius } from './utils';
 
+export type DrawCallback = (context: CanvasRenderingContext2D, zoom: number) => void;
+
 type Props = {
   className: string;
   width: number;
   height: number;
-  draw: ((context: CanvasRenderingContext2D) => void)[];
+  draw: DrawCallback[];
 };
 
 type CanvasRef = HTMLCanvasElement | null;
@@ -102,7 +104,6 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
       const newRadius = getPinchRadius(event);
       const zoomDirection = prevRadius < newRadius ? 1 : -1;
       const zoomUpdate = +(prevRadius !== newRadius) * zoomDirection * 0.1;
-      console.log(zoomUpdate);
       pinchState.current.radius = newRadius;
       updateZoom([zoomUpdate, x, y]);
     },
@@ -136,7 +137,9 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
     const { width, height, draw } = props;
     const [zoom, ptx, pty] = zoomState;
 
-    context.clearRect(0, 0, width, height);
+    context.clearRect(0, 0, width * zoom, height * zoom);
+    context.fillStyle = '#fdfff5';
+    context.fillRect(0, 0, width * zoom, height * zoom);
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.translate(ptx, pty);
     context.scale(zoom, zoom);
@@ -148,7 +151,7 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
     const [panX, panY] = getCurrentPan(panState.current.coords);
 
     context.translate(panX, panY);
-    draw.forEach((draw) => draw(context));
+    draw.forEach((draw) => draw(context, zoom));
   }, [canvasElement, zoomState, props, panState, didUpdate, updatePan, getCurrentPan]);
 
   // Append touch listener
@@ -161,7 +164,6 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
       panState.current.isActive = true;
       event.preventDefault();
       const { touches } = event;
-
       switch (touches.length) {
         case 1:
           const touch = touches[0];
@@ -198,13 +200,13 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
           break;
       }
     }
-    currentElement.ontouchstart = onTouchStart;
-    currentElement.ontouchmove = onTouchMove;
-    currentElement.ontouchend = onTouchEnd;
+    currentElement.addEventListener('touchstart', onTouchStart);
+    currentElement.addEventListener('touchmove', onTouchMove);
+    currentElement.addEventListener('touchend', onTouchEnd);
     return (): void => {
-      currentElement.ontouchstart = null;
-      currentElement.ontouchmove = null;
-      currentElement.ontouchend = null;
+      currentElement.removeEventListener('touchstart', onTouchStart);
+      currentElement.removeEventListener('touchmove', onTouchMove);
+      currentElement.removeEventListener('touchend', onTouchEnd);
     };
   }, [canvasElement, updatePan, getCurrentPan, handlePinch]);
 

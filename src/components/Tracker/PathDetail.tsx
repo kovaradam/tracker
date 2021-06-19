@@ -8,6 +8,7 @@ import {
   IoIosTimer,
   BiCalendarWeek,
   HiOutlineColorSwatch,
+  FaMountain,
 } from 'react-icons/all';
 
 import { StoreName } from '../../db/config';
@@ -127,6 +128,9 @@ const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
         label={[<GiPathDistance />, 'length']}
       />
       <Dialog.FormValue ref={durationFormElement} label={[<IoIosTimer />, 'duration']} />
+      <Dialog.FormValue label={[<FaMountain />, 'height profile']}>
+        <HeightProfile path={path} />
+      </Dialog.FormValue>
       <Dialog.FormValue label={[<BiCalendarWeek />, 'date']}>
         {getDate()}
       </Dialog.FormValue>
@@ -142,7 +146,6 @@ const PathDetail: React.FC<Props> = ({ path, updatePath }) => {
           ))}
         </S.ColorPicker>
       </Dialog.FormValue>
-      <HeightProfile path={path} />
     </S.Wrapper>
   );
 };
