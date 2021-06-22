@@ -3,42 +3,52 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { css } from '@linaria/core';
 
 import { Path, Position } from '../../db/model';
-import { pathColors } from '../../style';
+import { canvasColor, pathColors } from '../../style';
 import formatDistance from '../../utils/format-distance';
 import { getPathDistance } from '../../utils/position-distance';
 import useMatchMedia from '../../utils/use-match-media';
 import Canvas, { DrawCallback } from '../Canvas';
 
-const canvasWidth = 1000;
-
 type Props = { path: Path };
+
+const defaultCanvasWidth = 1000;
+
+const text = {
+  size: 7,
+  color: pathColors[2],
+  backgroundColor: `${canvasColor}`,
+};
 
 const HeightProfile: React.FC<Props> = ({ path }) => {
   const canvasElement = useRef<HTMLCanvasElement>(null);
-  const [canvasHeight, setCanvasHeight] = useState(canvasWidth / 2);
+  const [canvasDims, setCanvasDims] = useState({
+    width: defaultCanvasWidth,
+    height: defaultCanvasWidth / 3,
+  });
   const isPortait = useMatchMedia('(orientation: portrait)');
+
   const padY = useCallback(
     (value: number) => {
-      return padDimension(value, 0.9, canvasHeight);
+      return padDimension(value, 0.9, canvasDims.height);
     },
-    [canvasHeight],
+    [canvasDims.height],
   );
 
-  const padX = useCallback((value: number) => {
-    return padDimension(value, 0.9, canvasWidth);
-  }, []);
+  const padX = useCallback(
+    (value: number) => {
+      return padDimension(value, 0.9, canvasDims.width);
+    },
+    [canvasDims.width],
+  );
 
   const drawPath = useCallback<DrawCallback>(
     (context, zoom) => {
-      const nodes = getLineNodes(path.positions, {
-        width: canvasWidth,
-        height: canvasHeight,
-      });
+      const nodes = getLineNodes(path.positions, canvasDims);
 
-      context.lineWidth = 5.5 / zoom;
+      context.lineWidth = 1.5 / zoom;
       context.lineCap = 'round';
       context.lineJoin = 'round';
-      const gradient = context.createLinearGradient(0, 0, canvasWidth, 0);
+      const gradient = context.createLinearGradient(0, 0, canvasDims.width, 0);
       gradient.addColorStop(0, pathColors[2]);
       gradient.addColorStop(0.5, pathColors[0]);
       gradient.addColorStop(1, pathColors[2]);
@@ -46,19 +56,16 @@ const HeightProfile: React.FC<Props> = ({ path }) => {
       context.beginPath();
       context.setLineDash([]);
       nodes.forEach(([x, y]) => {
-        context.lineTo(padX(x) + 0.5, padY(canvasHeight - y) + 0.5);
+        context.lineTo(padX(x) + 0.5, padY(canvasDims.height - y) + 0.5);
       });
       context.stroke();
     },
-    [path, padY, padX, canvasHeight],
+    [path, padY, padX, canvasDims],
   );
 
   const drawLabels = useCallback<DrawCallback>(
     (context, zoom) => {
-      const nodes = getLineNodes(path.positions, {
-        width: canvasWidth,
-        height: canvasHeight,
-      });
+      const nodes = getLineNodes(path.positions, canvasDims);
       const positionMap = augmentPositions(path.positions).map(
         ({ coords: { altitude }, distance }, index) => ({
           altitude,
@@ -67,12 +74,12 @@ const HeightProfile: React.FC<Props> = ({ path }) => {
         }),
       );
 
-      context.lineWidth = 3.5 / zoom;
+      context.lineWidth = 1 / zoom;
       context.lineCap = 'round';
       context.lineJoin = 'round';
       context.strokeStyle = '#80808050';
       context.lineDashOffset = 50;
-      context.font = '20px Arial';
+      context.font = `${text.size}px Arial`;
       context.fillStyle = pathColors[2];
 
       // vertical lines
@@ -83,53 +90,60 @@ const HeightProfile: React.FC<Props> = ({ path }) => {
         const [x, y] = node;
         context.beginPath();
         context.setLineDash([5, 4]);
-        context.moveTo(padX(x) + 0.5, canvasHeight + 0.5);
-        context.lineTo(padX(x) + 0.5, padY(canvasHeight - y) + 0.5);
+        context.moveTo(padX(x) + 0.5, canvasDims.height + 0.5);
+        context.lineTo(padX(x) + 0.5, padY(canvasDims.height - y) + 0.5);
         context.stroke();
-        context.fillText(formatDistance(distance, true), padX(x) + 4.5, canvasHeight - 2);
+
+        const textDims = [padX(x) + 4.5, canvasDims.height - 2];
+        context.fillStyle = text.backgroundColor;
+        context.fillRect(textDims[0] - 2, textDims[1] - 8, 25, 13);
+        context.fillStyle = pathColors[2];
+        context.fillText(formatDistance(distance, true), textDims[0], textDims[1]);
       });
 
       const extremes = getPathExtremes(path.positions);
       const showIndices = [0, positionMap.length - 1];
-      context.lineWidth = 2 / zoom;
+      context.lineWidth = 1 / zoom;
+
       // horizontal lines
       positionMap.forEach(({ altitude, node: [x, y] }, index) => {
         if (!showIndices.includes(index) && !extremes.includes(altitude || -1)) {
           return;
         }
         context.beginPath();
-        context.moveTo(0.5, padY(canvasHeight - y) + 0.5);
-        context.lineTo(padX(x) + 0.5, padY(canvasHeight - y) + 0.5);
+        context.moveTo(0.5, padY(canvasDims.height - y) + 0.5);
+        context.lineTo(padX(x) + 0.5, padY(canvasDims.height - y) + 0.5);
         context.stroke();
-        context.fillText(
-          formatDistance(altitude ?? 0, true),
-          5.5,
-          padY(canvasHeight - y) - 4.5,
-        );
+
+        const textDims = [5.5, padY(canvasDims.height - y) - 4.5];
+        context.fillStyle = text.backgroundColor;
+        context.fillRect(textDims[0] - 3, textDims[1] - 7, 25, text.size + 3);
+        context.fillStyle = pathColors[2];
+        context.fillText(formatDistance(altitude ?? 0, true), textDims[0], textDims[1]);
       });
     },
-    [path, padY, padX, canvasHeight],
+    [path, padY, padX, canvasDims],
   );
 
-  const updateHeight = useCallback((element: HTMLCanvasElement | null) => {
+  const updateDims = useCallback((element: HTMLCanvasElement | null) => {
     if (!element) {
       return;
     }
-    const newHeight = Math.round(canvasWidth / getElementDimRatio(element));
-    setCanvasHeight(newHeight);
+    const width = element.offsetWidth;
+    const height = Math.round(width / getElementDimRatio(element));
+    setCanvasDims({ width, height });
   }, []);
 
   useEffect(() => {
     if (!canvasElement.current) {
       return;
     }
-    updateHeight(canvasElement.current);
-  }, [updateHeight, isPortait]);
+    updateDims(canvasElement.current);
+  }, [updateDims, isPortait]);
 
   return (
     <Canvas
-      width={canvasWidth}
-      height={canvasHeight}
+      {...canvasDims}
       className={style}
       draw={[drawLabels, drawPath]}
       ref={canvasElement}

@@ -107,5 +107,6 @@ const ActiveIcon = styled(FaLocationArrow)`
 
 const PassiveIcon = styled(FaCircle)`
   font-size: 2rem;
-  /* margin-top: 20px; */
+  box-shadow: 0px 0px 3px 16px #ffff0061;
+  border-radius: 101px;
 `;

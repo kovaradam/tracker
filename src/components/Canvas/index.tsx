@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useReducer, useRef } from 'react';
 
 import { styled } from '@linaria/react';
 
+import { canvasColor } from '../../style';
 import useForwardedRef from '../../utils/use-forwarded-ref';
 import { getCanvasCursorPosition, getPinchCenter, getPinchRadius } from './utils';
 
@@ -137,9 +138,9 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
     const { width, height, draw } = props;
     const [zoom, ptx, pty] = zoomState;
 
-    context.clearRect(0, 0, width * zoom, height * zoom);
-    context.fillStyle = '#fdfff5';
-    context.fillRect(0, 0, width * zoom, height * zoom);
+    context.clearRect(-zoom, -zoom, width * zoom, height * zoom);
+    context.fillStyle = canvasColor;
+    context.fillRect(-zoom, -zoom, width * zoom, height * zoom);
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.translate(ptx, pty);
     context.scale(zoom, zoom);
