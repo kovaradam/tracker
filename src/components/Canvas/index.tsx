@@ -161,6 +161,7 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
       return;
     }
     const currentElement = canvasElement.current;
+
     function onTouchStart(event: TouchEvent): void {
       panState.current.isActive = true;
       event.preventDefault();
@@ -176,6 +177,7 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
           break;
       }
     }
+
     function onTouchMove(event: TouchEvent): void {
       const { changedTouches } = event;
       switch (changedTouches.length) {
@@ -189,6 +191,7 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
           break;
       }
     }
+
     function onTouchEnd(event: TouchEvent): void {
       const { changedTouches } = event;
       switch (changedTouches.length) {
@@ -201,9 +204,11 @@ const Canvas = React.forwardRef<CanvasRef, Props>((props, forwardedRef) => {
           break;
       }
     }
+
     currentElement.addEventListener('touchstart', onTouchStart);
     currentElement.addEventListener('touchmove', onTouchMove);
     currentElement.addEventListener('touchend', onTouchEnd);
+
     return (): void => {
       currentElement.removeEventListener('touchstart', onTouchStart);
       currentElement.removeEventListener('touchmove', onTouchMove);

@@ -115,7 +115,7 @@ const HeightProfile: React.FC<Props> = ({ path }) => {
         context.lineTo(padX(x) + 0.5, padY(canvasDims.height - y) + 0.5);
         context.stroke();
 
-        const textDims = [5.5, padY(canvasDims.height - y) - 4.5];
+        const textDims = [5.5, padY(canvasDims.height - y) - 2.5];
         context.fillStyle = text.backgroundColor;
         context.fillRect(textDims[0] - 3, textDims[1] - 7, 25, text.size + 3);
         context.fillStyle = pathColors[2];
