@@ -30,11 +30,12 @@ const S = {
   Message: styled.code`
     border-radius: 5px;
     padding: 0 0.1rem;
-    animation: rotate 1s linear;
+    animation: alert 1s linear;
     word-wrap: break-word;
     display: inline-block;
-    max-width: 70vw;
-    @keyframes rotate {
+    position: absolute;
+    max-width: 60vw;
+    @keyframes alert {
       from {
         background-color: #ff9a4a;
       }

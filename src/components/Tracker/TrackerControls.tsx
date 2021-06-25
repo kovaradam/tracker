@@ -87,7 +87,6 @@ const S = {
       z-index: 1000;
       padding: 1rem;
       position: fixed;
-      height: min-content;
       display: flex;
     }
   `,
@@ -98,6 +97,7 @@ const S = {
     justify-content: space-between;
     flex-direction: row-reverse;
     width: 100vw;
+    padding: 0;
     box-sizing: border-box;
   `,
 
