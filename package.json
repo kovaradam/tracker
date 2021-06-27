@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "serve": "vite preview"
+    "build": "tsc && vite build && mkdir \"dist/src\" && cp src/create-leaflet-stylesheet.js dist/src/create-leaflet-stylesheet.js",
+    "preview": "vite preview",
+    "serve": "npm run build && npx surge ./dist tratracker.surge.sh"
   },
   "dependencies": {
     "@linaria/babel-preset": "^3.0.0-beta.4",
@@ -38,6 +39,7 @@
     "react-dom": "^17.0.0",
     "react-icons": "^4.2.0",
     "rollup-plugin-css-only": "^3.1.0",
+    "surge": "^0.23.0",
     "typescript": "^4.1.2",
     "vite": "^2.2.3",
     "vite-plugin-linaria": "^1.0.0"

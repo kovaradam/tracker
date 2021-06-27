@@ -3,13 +3,11 @@ import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'reac
 import { css } from '@linaria/core';
 import { styled } from '@linaria/react';
 import { read, update } from 'indexeddb-hooked';
-import {
-  GiPathDistance,
-  IoIosTimer,
-  BiCalendarWeek,
-  HiOutlineColorSwatch,
-  FaMountain,
-} from 'react-icons/all';
+import { BiCalendarWeek } from 'react-icons/bi';
+import { FaMountain } from 'react-icons/fa';
+import { GiPathDistance } from 'react-icons/gi';
+import { HiOutlineColorSwatch } from 'react-icons/hi';
+import { IoIosTimer } from 'react-icons/io';
 
 import { StoreName } from '../../db/config';
 import { Path } from '../../db/model';
