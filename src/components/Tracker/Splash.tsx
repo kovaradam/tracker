@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { styled } from '@linaria/react';
-import { BiTimer } from 'react-icons/bi';
 
+import icon from '../../assets/icon.svg';
 import { useTracker } from '../../tracker/use-tracker';
 import { TrackerWrapperComponent } from './';
 
@@ -11,7 +11,7 @@ const Splash: TrackerWrapperComponent = ({ isVisible }) => {
 
   return (
     <S.Wrapper isVisible={isVisible}>
-      <S.AppIcon />
+      <S.AppIcon src={icon} title="app icon" />
       <S.TrackButton onClick={start}>Start trackin'</S.TrackButton>
     </S.Wrapper>
   );
@@ -40,10 +40,11 @@ const S = {
     color: white;
     border-radius: 1rem;
   `,
-  AppIcon: styled(BiTimer)`
+  AppIcon: styled.img`
     font-size: 10rem;
     color: gray;
     margin-bottom: 5vh;
-    outline: white; ;
+    outline: white;
+    width: 50vh;
   `,
 };
