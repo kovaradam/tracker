@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { atom, useAtom } from 'jotai';
 
@@ -25,7 +25,7 @@ type UseTrackerReturnType = [
 
 export function useTracker(): UseTrackerReturnType {
   const [state, setState] = useAtom(trackerState);
-  const [subscribe, { unsubscribeCurrent }] = useLocationWatcher();
+  const [subscribe, { unsubscribeCurrent, error }] = useLocationWatcher();
   const [currentPath, updateCurrentPath] = useCurrentPath();
 
   const start = useCallback(() => {
@@ -43,6 +43,12 @@ export function useTracker(): UseTrackerReturnType {
       unsubscribeCurrent();
     }
   }, [setState, unsubscribeCurrent]);
+
+  useEffect(() => {
+    if (error) {
+      end();
+    }
+  }, [error, end]);
 
   return [state.position, { start, end, isTracking: state.isTracking, currentPath }];
 }

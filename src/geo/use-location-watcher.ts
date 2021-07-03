@@ -36,6 +36,7 @@ function useLocationWatcher(): UseLocationReturntype {
       }
       setState((prev) => ({
         ...prev,
+        error: null,
         unsubscribeCurrent: unsubscribe,
       }));
       return unsubscribe;
