@@ -64,9 +64,10 @@ class MockGeolocation {
       coords: { latitude, longitude, heading: 0, altitude },
     };
 
-    const heading =
-      getHeadingFromPositions([...MockGeolocation.positions, newPosition as Position]) ??
-      0;
+    const heading = getHeadingFromPositions([
+      ...MockGeolocation.positions,
+      newPosition as Position,
+    ]);
     newPosition.coords.heading = heading;
 
     MockGeolocation.addPosition(newPosition as Position);
@@ -83,8 +84,8 @@ function withRandomSign(input: number): number {
   return sign * input;
 }
 
-function getHeadingFromPositions(positions: Position[]): number | null {
-  const errorValue = null;
+export function getHeadingFromPositions(positions: Position[]): number {
+  const errorValue = 0;
   const pathPositionsLength = positions.length || 0;
   if (pathPositionsLength < 2) {
     return errorValue;

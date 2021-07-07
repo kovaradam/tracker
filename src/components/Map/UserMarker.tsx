@@ -6,6 +6,7 @@ import { styled } from '@linaria/react';
 import * as L from 'leaflet';
 import { FaCircle, FaLocationArrow } from 'react-icons/fa';
 
+import { getHeadingFromPositions } from '../../geo/mock-geolocation';
 import useMap from '../../map/use-map';
 import { useTracker } from '../../tracker/use-tracker';
 
@@ -37,6 +38,18 @@ const UserMarker: React.FC<Props> = ({ isActive }) => {
     }
   }, [map, position, isActive]);
 
+  const getHeading = useCallback((): number => {
+    const positions = currentPath?.positions;
+    const heading = position?.coords.heading;
+    if (!heading && !positions) {
+      return 0;
+    }
+    if (!heading) {
+      return getHeadingFromPositions(positions!);
+    }
+    return heading;
+  }, [currentPath, position]);
+
   useEffect(() => {
     // change marker on active change
     createMarker();
@@ -50,7 +63,7 @@ const UserMarker: React.FC<Props> = ({ isActive }) => {
     if (!marker.current) {
       createMarker();
     }
-    direction.current = position.coords.heading ?? 0;
+    direction.current = getHeading();
     const { latitude, longitude } = position.coords;
     marker.current?.setLatLng([latitude, longitude]);
     const iconElement = document.getElementById(iconId);
@@ -60,7 +73,15 @@ const UserMarker: React.FC<Props> = ({ isActive }) => {
         : defaultDirection;
       iconElement.style.transform = `rotate(${rotation}deg)`;
     }
-  }, [position, removeMarker, currentPath, direction, isActive, createMarker]);
+  }, [
+    position,
+    removeMarker,
+    currentPath,
+    direction,
+    isActive,
+    createMarker,
+    getHeading,
+  ]);
 
   return null;
 };
