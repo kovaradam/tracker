@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && mkdir \"dist/src\" && cp src/create-leaflet-stylesheet.js dist/src/create-leaflet-stylesheet.js",
+    "build": "tsc && vite build && mkdir \"dist/src\" && cp src/create-leaflet-stylesheet.js dist/src/create-leaflet-stylesheet.js && cp service-worker.js dist/service-worker.js && cp -rf icons \"dist/assets/icons\" && cp .webmanifest \"dist/manifest.webmanifest\"",
     "preview": "vite preview",
     "serve": "npm run build && npx surge ./dist tratracker.surge.sh"
   },

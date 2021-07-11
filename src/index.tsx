@@ -19,4 +19,6 @@ ReactDOM.render(
   document.getElementById('root'),
 );
 
-// add leaflet stylesheets here bc of linaria plugin problems
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
