@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useTracker } from '../../tracker/use-tracker';
+import Settings from '../Settings/indes';
 import Splash from './Splash';
 import TrackerControls from './TrackerControls';
 
@@ -20,6 +21,7 @@ const Tracker: React.FC = () => {
     <>
       <Splash isVisible={isSplashVisible} />
       <TrackerControls isVisible={!isSplashVisible} />
+      <Settings />
     </>
   );
 };

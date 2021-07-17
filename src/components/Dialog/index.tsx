@@ -2,6 +2,7 @@ import React from 'react';
 
 import { styled } from '@linaria/react';
 
+import { Overlay } from '../../style';
 import useOnClickOutside from '../../utils/use-on-click-outside';
 import { Button, ActionButton } from './Buttons';
 import FormValue from './FormValue';
@@ -33,27 +34,7 @@ Dialog.ActionButton = ActionButton;
 export default Dialog;
 
 const S = {
-  Overlay: styled.div`
-    width: 100vw;
-    height: 100vh !important;
-    position: absolute;
-    background-color: #27252555;
-    top: 0;
-    left: 0;
-    box-sizing: border-box;
-    align-items: center;
-    justify-content: center;
-    animation: show 200ms;
-
-    @keyframes show {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    } ;
-  `,
+  Overlay: styled(Overlay)``,
   Wrapper: styled.div`
     width: 80vw;
     height: 75vh;

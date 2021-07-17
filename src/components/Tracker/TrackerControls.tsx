@@ -10,6 +10,7 @@ import useMap from '../../map/use-map';
 import { useTracker } from '../../tracker/use-tracker';
 import formatDistance from '../../utils/format-distance';
 import { getPathDistance } from '../../utils/position-distance';
+import { settingsViewState } from '../Settings/indes';
 import { TrackerWrapperComponent } from './';
 import Message from './Message';
 import NewPathDialog from './NewPathDialog';
@@ -23,6 +24,9 @@ const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
   const [, { centerMapView }] = useMap();
   const [isPathDialogVisible, toggleIsPathDialogVisible] = useReducer((p) => !p, false);
   const [selectedPathId, setSelectedPathId] = useAtom(selectedPathIdAtom);
+  const [, setIsSettingsVisible] = useAtom(settingsViewState);
+
+  const showSettings = (): void => setIsSettingsVisible(true) as void;
 
   const toggleTracker = useCallback(() => {
     if (isTracking) {
@@ -53,7 +57,7 @@ const TrackerControls: TrackerWrapperComponent = ({ isVisible }) => {
         <S.UtilsButton onClick={centerMapView}>
           <S.CenterIcon />
         </S.UtilsButton>
-        <S.UtilsButton>
+        <S.UtilsButton onClick={showSettings}>
           <S.SettingsIcon />
         </S.UtilsButton>
       </S.LeftPanelWrapper>
