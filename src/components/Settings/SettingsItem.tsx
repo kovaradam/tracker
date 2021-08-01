@@ -17,7 +17,7 @@ export const SettingsItem: React.FC<Props> = ({ icon, legend, children }) => {
         </S.Marker>
       </S.Legend>
       <div>
-        <S.ContentWrapper>content</S.ContentWrapper>
+        <S.ContentWrapper>{children}</S.ContentWrapper>
       </div>
     </S.Wrapper>
   );

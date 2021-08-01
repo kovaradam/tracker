@@ -6,6 +6,7 @@ import { FiX, MdUpdate } from 'react-icons/all';
 
 import { Overlay } from '../../style';
 import { SettingsItem } from './SettingsItem';
+import {IntervalUpdateInput} from './IntervalUpdateInput';
 
 export const settingsViewState = atom(true);
 
@@ -27,10 +28,9 @@ const Settings: React.FC = () => {
         </S.CloseButton>
         <S.Line />
         <S.Form>
-          <SettingsItem
-            icon={<MdUpdate />}
-            legend="Location update interval"
-          ></SettingsItem>
+          <SettingsItem icon={<MdUpdate />} legend="Location update interval">
+            <IntervalUpdateInput />
+          </SettingsItem>
         </S.Form>
       </S.Wrapper>
     </>
