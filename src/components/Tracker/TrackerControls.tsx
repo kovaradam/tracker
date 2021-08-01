@@ -10,7 +10,7 @@ import useMap from '../../map/use-map';
 import { useTracker } from '../../tracker/use-tracker';
 import formatDistance from '../../utils/format-distance';
 import { getPathDistance } from '../../utils/position-distance';
-import { settingsViewState } from '../Settings/indes';
+import { settingsViewState } from '../Settings/index';
 import { TrackerWrapperComponent } from './';
 import Message from './Message';
 import NewPathDialog from './NewPathDialog';

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useTracker } from '../../tracker/use-tracker';
-import Settings from '../Settings/indes';
+import Settings from '../Settings/index';
 import Splash from './Splash';
 import TrackerControls from './TrackerControls';
 

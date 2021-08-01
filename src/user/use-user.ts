@@ -7,7 +7,7 @@ import { createWebStorageAccess } from '../utils/web-storage';
 
 type UserStore = {
   preferences: {
-    geolocationInterval: number;
+    geolocationInterval?: number;
   };
 };
 
