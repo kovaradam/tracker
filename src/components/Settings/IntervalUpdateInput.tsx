@@ -30,7 +30,7 @@ export const IntervalUpdateInput: React.FC = () => {
         min="1000"
         max="10000"
         value={preferences.geolocationInterval}
-      onInput={setIntervalValue}
+        onInput={setIntervalValue}
       />
     </S.Wrapper>
   );
