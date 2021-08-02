@@ -13,7 +13,7 @@ type HookState = { error: Error; unsubscribeCurrent: Unsubscribe };
 const hookState = atom<HookState>({ error: null, unsubscribeCurrent: undefined });
 
 type UseLocationReturntype = [
-  subscribe: (listener: Listener) => Unsubscribe,
+  subscribe: (listener: Listener,options?:PositionOptions) => Unsubscribe,
   state: HookState,
 ];
 

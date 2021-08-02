@@ -17,7 +17,7 @@ const defaultValue: UserStore = {
   },
 };
 
-const [getUserSettings, setUserSettings] = createWebStorageAccess<typeof defaultValue>(
+export const [getUserSettings, setUserSettings] = createWebStorageAccess<typeof defaultValue>(
   'user',
   {
     defaultValue,

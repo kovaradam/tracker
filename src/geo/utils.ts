@@ -1,5 +1,6 @@
 import { __DEV__ } from '../config';
 import { Position } from '../db/model';
+import { getUserSettings } from '../user/use-user';
 import MockGeolocation from './mock-geolocation';
 
 export function getLatLngTuple(position: Position | null): L.LatLngTuple | null {
@@ -25,7 +26,8 @@ export function watchPosition(
     }
     return;
   }
-  const id = geolocation.watchPosition(onSuccess, onError, { timeout: 500 });
+
+  const id = geolocation.watchPosition(onSuccess, onError, options);
   clear = (): void => {
     geolocation.clearWatch(id);
   };

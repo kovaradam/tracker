@@ -4,6 +4,7 @@ import { atom, useAtom } from 'jotai';
 
 import { Position } from '../db/model';
 import useLocationWatcher from '../geo/use-location-watcher';
+import { getUserSettings } from '../user/use-user';
 import { CurrentPath, useCurrentPath } from './use-current-path';
 
 type TrackerState = {
@@ -29,12 +30,14 @@ export function useTracker(): UseTrackerReturnType {
   const [currentPath, updateCurrentPath] = useCurrentPath();
 
   const start = useCallback(() => {
+    const timeout = getUserSettings()?.preferences.geolocationInterval || undefined;
+    const options = { timeout };
     setState((prev) => ({ ...prev, isTracking: true }));
     subscribe((position) => {
       const newPosition = getPositionCopy(position);
       updateCurrentPath(newPosition);
       setState((prev) => ({ ...prev, position: newPosition }));
-    });
+    }, options);
   }, [setState, subscribe, updateCurrentPath]);
 
   const end = useCallback(() => {
